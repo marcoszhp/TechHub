@@ -1,0 +1,23 @@
+{
+  "tickets": [
+    {
+      "title": "Exemplo — impressora sem comunicação",
+      "description": "Chamado de exemplo para demonstrar os campos locais do atendimento.",
+      "category": "Impressora",
+      "priority": "Normal",
+      "status": "Aberto",
+      "requester": "exemplo"
+    }
+  ],
+  "playbooks": [
+    {
+      "id": "health-check",
+      "name": "Verificação de saúde",
+      "description": "Coleta métricas locais sem alterar o sistema.",
+      "steps": [
+        { "id": "health", "name": "Coletar Dashboard", "action": "CollectDashboard", "requiresConfirmation": false }
+      ],
+      "enabled": true
+    }
+  ]
+}
