@@ -28,6 +28,7 @@ public partial class MainWindow : FluentWindow
         {
             ApplicationThemeManager.Apply(ApplicationTheme.Light, WindowBackdropType.Mica, true);
             Background = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(243, 246, 250));
+            ThemeStatus.Text = "Claro ativo";
         }
         catch (Exception exception) { Serilog.Log.Error(exception, "Falha ao aplicar tema claro"); }
     }
@@ -38,6 +39,7 @@ public partial class MainWindow : FluentWindow
         {
             ApplicationThemeManager.Apply(ApplicationTheme.Dark, WindowBackdropType.Mica, true);
             Background = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(15, 23, 42));
+            ThemeStatus.Text = "Escuro ativo";
         }
         catch (Exception exception) { Serilog.Log.Error(exception, "Falha ao aplicar tema escuro"); }
     }

@@ -22,9 +22,9 @@
 
         <ui:TitleBar Grid.Row="0" Title="TechHub — Manutenção e Suporte" />
         <StackPanel Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,4,112,0" VerticalAlignment="Center">
-            <TextBlock Text="Tema" VerticalAlignment="Center" Margin="0,0,8,0" Foreground="#475467" />
-            <Button Click="OnLightThemeClick" Content="☀ Claro" Padding="10,4" Margin="0,0,4,0" AutomationProperties.Name="Usar tema claro" />
-            <Button Click="OnDarkThemeClick" Content="☾ Escuro" Padding="10,4" AutomationProperties.Name="Usar tema escuro" />
+            <TextBlock x:Name="ThemeStatus" Text="Escuro ativo" VerticalAlignment="Center" Margin="0,0,10,0" Foreground="#A7B6C8" FontSize="12" />
+            <Button Click="OnLightThemeClick" Content="☀ Claro" Padding="10,4" Margin="0,0,4,0" Background="#E8EEF5" Foreground="#243B53" BorderBrush="#C4D0DC" BorderThickness="1" AutomationProperties.Name="Usar tema claro" />
+            <Button Click="OnDarkThemeClick" Content="☾ Escuro" Padding="10,4" Background="#1D3048" Foreground="#E6EDF5" BorderBrush="#4C6A88" BorderThickness="1" AutomationProperties.Name="Usar tema escuro" />
         </StackPanel>
 
         <TabControl x:Name="Navigation" Grid.Row="1" Style="{StaticResource HubNavigation}" SelectionChanged="OnNavigationChanged">
