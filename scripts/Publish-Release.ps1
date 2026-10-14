@@ -21,7 +21,7 @@ try {
     $releases = @(Invoke-RestMethod -Uri "$api/releases" -Headers $headers)
     $release = $releases | Where-Object tag_name -eq $Tag | Select-Object -First 1
     if ($Publish) {
-        if (!$release -or !$release.draft) { throw 'É necessário um rascunho existente para publicar.' }
+        if ($null -eq $release -or $release.draft -ne $true) { throw 'É necessário um rascunho existente para publicar.' }
         $names = @($release.assets | ForEach-Object name)
         foreach ($expected in @('TechHub-Setup-1.1.0.exe','TechHub-Portable-1.1.0-win-x64.zip','SHA256SUMS.txt')) {
             if ($expected -notin $names) { throw "Pacote ausente: $expected" }
