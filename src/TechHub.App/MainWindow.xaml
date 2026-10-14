@@ -9,8 +9,8 @@
                  MinWidth="1080"
                  MinHeight="700"
                  FontFamily="Segoe UI"
-                 Foreground="#172B42"
-                 Background="#F3F6FA"
+                 Foreground="#E6EDF5"
+                 Background="#0F172A"
                  ExtendsContentIntoTitleBar="True"
                  WindowStartupLocation="CenterScreen">
     <Grid>
@@ -35,29 +35,29 @@
                             <Button Width="120" HorizontalAlignment="Right" Command="{Binding Dashboard.RefreshCommand}" Content="Atualizar" DockPanel.Dock="Right" />
                             <StackPanel>
                                 <TextBlock FontSize="22" FontWeight="SemiBold" Text="Saúde do computador" />
-                                <TextBlock Foreground="#667085" Text="Métricas locais, sem telemetria automática." />
+                                <TextBlock Foreground="#A7B6C8" Text="Métricas locais, sem telemetria automática." />
                             </StackPanel>
                         </DockPanel>
                         <UniformGrid Columns="4" Margin="0,0,0,16">
-                            <Border Margin="0,0,10,0" Padding="16" Background="#EEF4FF" CornerRadius="10">
+                            <Border Margin="0,0,10,0" Padding="16" Background="#172E4D" CornerRadius="10">
                                 <StackPanel>
                                     <TextBlock Text="Índice de recursos¹" />
                                     <TextBlock FontSize="30" FontWeight="Bold" Text="{Binding Dashboard.HealthScore, TargetNullValue=—}" />
                                 </StackPanel>
                             </Border>
-                            <Border Margin="0,0,10,0" Padding="16" Background="#F5F3FF" CornerRadius="10">
+                            <Border Margin="0,0,10,0" Padding="16" Background="#292345" CornerRadius="10">
                                 <StackPanel>
                                     <TextBlock Text="CPU" />
                                     <TextBlock FontSize="24" Text="{Binding Dashboard.CpuUsagePercent, StringFormat={}{0:0.0}%, TargetNullValue=—}" />
                                 </StackPanel>
                             </Border>
-                            <Border Margin="0,0,10,0" Padding="16" Background="#ECFDF3" CornerRadius="10">
+                            <Border Margin="0,0,10,0" Padding="16" Background="#12372F" CornerRadius="10">
                                 <StackPanel>
                                     <TextBlock Text="Memória" />
                                     <TextBlock FontSize="24" Text="{Binding Dashboard.MemoryUsagePercent, StringFormat={}{0:0.0}%, TargetNullValue=—}" />
                                 </StackPanel>
                             </Border>
-                            <Border Padding="16" Background="#FFF7ED" CornerRadius="10">
+                            <Border Padding="16" Background="#3A2B19" CornerRadius="10">
                                 <StackPanel>
                                     <TextBlock Text="Disco do sistema" />
                                     <TextBlock FontSize="24" Text="{Binding Dashboard.DiskUsagePercent, StringFormat={}{0:0.0}%, TargetNullValue=—}" />
