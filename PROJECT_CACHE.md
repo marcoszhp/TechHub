@@ -7,7 +7,8 @@ Atualizado em: 2026-10-14
 - Implementado o fluxo de atualização no Dashboard: consulta a release mais recente do GitHub, compara a versão instalada, baixa o instalador sem administrador pelo R2 e abre o instalador sob comando do usuário.
 - Versão do aplicativo e dos instaladores atualizada para `1.2.0`; os artefatos foram compilados e os checksums gerados.
 - Publicação em R2 preparada em `releases/1.2.0/`; a página `downloads/index.html` aponta para os novos arquivos.
-- Próximo passo operacional: publicar a release GitHub `v1.2.0`, enviar o commit e implantar a página Cloudflare Pages.
+- Release GitHub `v1.2.0` publicada com os quatro artefatos; commit `b361262` e tag `v1.2.0` enviados.
+- Cloudflare Pages atualizado em `https://21ab5b22.techhub-downloads.pages.dev`; domínio estável permanece `https://c6f30a0b.techhub-downloads.pages.dev/`.
 
 ## Workspace — entrega focada (2026-10-14)
 
