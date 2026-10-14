@@ -14,12 +14,12 @@ public sealed partial class SecurityViewModel : ObservableObject
     private readonly IActionConfirmationService _confirmation;
 
     [ObservableProperty] private string statusMessage = string.Empty;
-    [ObservableProperty] private bool defenderEnabled;
-    [ObservableProperty] private bool realTimeProtectionEnabled;
-    [ObservableProperty] private bool firewallEnabled;
-    [ObservableProperty] private bool bitLockerEnabled;
-    [ObservableProperty] private bool tpmPresent;
-    [ObservableProperty] private bool secureBootEnabled;
+    [ObservableProperty] private bool? defenderEnabled;
+    [ObservableProperty] private bool? realTimeProtectionEnabled;
+    [ObservableProperty] private bool? firewallEnabled;
+    [ObservableProperty] private bool? bitLockerEnabled;
+    [ObservableProperty] private bool? tpmPresent;
+    [ObservableProperty] private bool? secureBootEnabled;
     [ObservableProperty] private int localAdministratorCount;
 
     public ObservableCollection<string> Warnings { get; } = [];
@@ -37,6 +37,7 @@ public sealed partial class SecurityViewModel : ObservableObject
 
     public async Task RefreshAsync()
     {
+        StatusMessage = "Consultando os controles de segurança…";
         try
         {
             var snapshot = await _service.GetSnapshotAsync().ConfigureAwait(true);

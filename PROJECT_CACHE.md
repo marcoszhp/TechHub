@@ -1,6 +1,24 @@
 # TechHub — cache do projeto
 
-Atualizado em: 2026-10-13
+Atualizado em: 2026-10-14
+
+## Workspace — entrega focada (2026-10-14)
+
+- Criados `src/TechHub.App/Views/WorkspaceView.xaml` e `.xaml.cs`: seis seções por DataTriggers sobre o singleton existente, sem alterar Section no Loaded; formulários rotulados, seleção/busca/gravação/novo para clientes e equipamentos, PC e histórico readonly, ferramentas allowlist, console fixo com scroll/cancelamento, avisos de restauração separada e abertura de caminhos.
+- Criado `tests/TechHub.Tests/WorkspaceTests.cs`: 44 testes passaram em execução elevada e filtrada (armazenamento, ownership, snapshot WAL/JSON, proteção de dados ativos, ZIP inseguro/duplicado/symlink, manifesto/banco inválidos, validação de host e argumentos allowlist sem iniciar processos).
+- Build do App passou: 0 avisos e 0 erros. Nenhuma alteração em shell/App/DI/Styles/rede nesta entrega. DI existente: `WorkspaceRegistration.AddTechHubWorkspace()` já chamado pela infraestrutura; `WorkspaceViewModel` já singleton no App.
+- Inspeção visual interativa ainda não realizada nesta entrega. Encerrado após verificação focada conforme pedido; não publicar nem ampliar escopo.
+
+## Em andamento — versão 1.1 (não publicada)
+
+- Pedido atual: interface inspirada na foto, mapa de rede funcional, central técnica e download no Cloudflare. Contrato em `docs/TECHHUB-1.1-IMPLEMENTATION-PROMPT.md`.
+- Alterações locais ainda sem build/testes: shell azul-escuro e tema explícito WPF; título arrastável preservado; módulos sob demanda; correções de campos/layout; métricas e controles de segurança desconhecidos não devem aparecer como zero/desativado.
+- Serviços e VMs de rede/Workspace criados parcialmente. Faltavam as duas Views e testes ao retomar. Integrar DI, compilar e inspecionar interface real antes de publicar.
+- Instalador ajustado para versão1.1 e sem portable.flag/Data; publish usa destino novo release-1.1.0. Pacotes antigos NÃO foram substituídos nesta etapa.
+- Cloudflare autenticado via Wrangler4.150.0; Pages disponível, R2 não ativado (API10042). Plano: página no Cloudflare + binários no GitHub Releases, sem ativar cobrança. Nenhuma implantação realizada ainda.
+- Repositório público autorizado: https://github.com/marcoszhp/TechHub. HEAD anterior a38c481. Alterações de título anteriores preservadas.
+- A rodada anterior foi interrompida ao atingir5% restante. Ao retomar, uso13% da janela5h e51% semanal; não resgatados resets/créditos.
+- O histórico de builds abaixo refere-se à versão anterior, NÃO valida o trabalho1.1.
 
 ## Objetivo
 

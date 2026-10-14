@@ -9,10 +9,10 @@ public sealed partial class DashboardViewModel : ObservableObject
 {
     private readonly IDashboardService _dashboardService;
 
-    [ObservableProperty] private int healthScore;
-    [ObservableProperty] private double cpuUsagePercent;
-    [ObservableProperty] private double memoryUsagePercent;
-    [ObservableProperty] private double diskUsagePercent;
+    [ObservableProperty] private int? healthScore;
+    [ObservableProperty] private double? cpuUsagePercent;
+    [ObservableProperty] private double? memoryUsagePercent;
+    [ObservableProperty] private double? diskUsagePercent;
     [ObservableProperty] private string freeDiskText = "—";
     [ObservableProperty] private string operatingSystem = "—";
     [ObservableProperty] private string privilegeText = "—";
@@ -29,6 +29,7 @@ public sealed partial class DashboardViewModel : ObservableObject
 
     public async Task RefreshAsync()
     {
+        StatusMessage = "Consultando métricas locais…";
         try
         {
             var snapshot = await _dashboardService.GetSnapshotAsync().ConfigureAwait(true);

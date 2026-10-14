@@ -1,160 +1,126 @@
-using System.Diagnostics;
-using System.Net;
-using System.Net.NetworkInformation;
-using System.Net.Sockets;
-using System.Text.RegularExpressions;
+using System.Collections.Concurrent;
 using TechHub.Core.Models;
 using TechHub.Core.Services;
 
 namespace TechHub.Infrastructure.Network;
 
-public sealed class NetworkScanner(INetworkConsentStore consentStore) : INetworkScanner
+public sealed class NetworkScanner : INetworkTopologyScanner
 {
-    private static readonly Regex ArpLine = new(
-        @"(?<ip>\d{1,3}(?:\.\d{1,3}){3})\s+(?<mac>[0-9a-fA-F-]{11,17})\s+(?<type>\w+)",
-        RegexOptions.Compiled | RegexOptions.CultureInvariant);
+    private readonly INetworkConsentStore _consentStore;
+    private readonly INetworkDiscoveryBackend _backend;
+
+    // The existing DI registration and constructor callers remain valid.
+    public NetworkScanner(INetworkConsentStore consentStore, INetworkDiscoveryBackend? backend = null)
+    {
+        _consentStore = consentStore;
+        _backend = backend ?? new WindowsNetworkDiscoveryBackend();
+    }
+
+    public Task<IReadOnlyList<NetworkAdapterInfo>> GetAdaptersAsync(CancellationToken cancellationToken = default) =>
+        _backend.GetAdaptersAsync(cancellationToken);
 
     public async Task<IReadOnlyList<NetworkDeviceInfo>> ScanAsync(
-        IProgress<ActionProgress>? progress = null,
-        CancellationToken cancellationToken = default)
+        IProgress<ActionProgress>? progress = null, CancellationToken cancellationToken = default)
     {
-        if (!await consentStore.HasConsentAsync(cancellationToken).ConfigureAwait(false))
-        {
-            throw new InvalidOperationException("A varredura exige consentimento explícito para a rede local.");
-        }
+        await RequireConsentAsync(cancellationToken).ConfigureAwait(false);
+        var adapters = await GetAdaptersAsync(cancellationToken).ConfigureAwait(false);
+        var adapter = adapters.FirstOrDefault() ?? throw new InvalidOperationException("Nenhum adaptador IPv4 ativo foi encontrado.");
+        return (await ScanAsync(adapter, progress, cancellationToken).ConfigureAwait(false)).Devices;
+    }
 
-        var subnet = GetActiveSubnet();
-        var addresses = subnet.HostAddresses.ToArray();
-        var reachable = new List<NetworkDeviceInfo>();
-        using var semaphore = new SemaphoreSlim(32);
+    public async Task<NetworkScanResult> ScanAsync(NetworkAdapterInfo adapter,
+        IProgress<ActionProgress>? progress = null, CancellationToken cancellationToken = default)
+    {
+        await RequireConsentAsync(cancellationToken).ConfigureAwait(false);
+        // Revalidate selection against live local configuration before sending any traffic.
+        var current = (await GetAdaptersAsync(cancellationToken).ConfigureAwait(false))
+            .FirstOrDefault(item => item.Id == adapter.Id && item.LocalAddress == adapter.LocalAddress);
+        if (current is null || current.PrefixLength != adapter.PrefixLength || current.GatewayAddress != adapter.GatewayAddress)
+            throw new InvalidOperationException("O adaptador mudou ou foi desconectado. Atualize os adaptadores antes de varrer.");
+
+        var addresses = NetworkAddressing.GetScanAddresses(current);
+        var candidates = addresses.ToHashSet(StringComparer.Ordinal);
+        var devices = new ConcurrentDictionary<string, NetworkDeviceInfo>(StringComparer.Ordinal);
+        var warnings = new List<string>();
         var completed = 0;
-        var tasks = addresses.Select(async address =>
-        {
-            await semaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
-            try
+        var probeErrors = 0;
+        progress?.Report(new ActionProgress($"Consultando {current.ScanCidr} · {addresses.Count} IPs", 0));
+        await Parallel.ForEachAsync(addresses, new ParallelOptions { MaxDegreeOfParallelism = 16, CancellationToken = cancellationToken },
+            async (address, token) =>
             {
-                using var ping = new Ping();
-                var started = Stopwatch.GetTimestamp();
-                var reply = await ping.SendPingAsync(address, 800).ConfigureAwait(false);
-                if (reply.Status == IPStatus.Success)
+                try
                 {
-                    var latency = (int)Math.Round(Stopwatch.GetElapsedTime(started).TotalMilliseconds);
-                    lock (reachable)
-                    {
-                        reachable.Add(new NetworkDeviceInfo(
-                            address.ToString(),
-                            string.Empty,
-                            "Fabricante desconhecido",
-                            string.Empty,
-                            "Dispositivo de rede",
-                            true,
-                            latency,
-                            DateTimeOffset.Now));
-                    }
+                    var reply = await _backend.ProbeAsync(address, token).ConfigureAwait(false);
+                    if (reply.IsReachable)
+                        devices[address] = new NetworkDeviceInfo(address, "", "Fabricante desconhecido", "", "Tipo desconhecido",
+                            true, reply.LatencyMilliseconds, DateTimeOffset.UtcNow) { WasProbed = true, Evidence = "Resposta ICMP" };
                 }
-            }
-            catch (PingException)
-            {
-                // Host indisponível não é uma falha da varredura.
-            }
-            finally
-            {
-                semaphore.Release();
-                var current = Interlocked.Increment(ref completed);
-                progress?.Report(new ActionProgress($"Verificando {current}/{addresses.Length}", current * 100d / addresses.Length));
-            }
-        });
-
-        await Task.WhenAll(tasks).ConfigureAwait(false);
-        var arp = await ReadArpTableAsync(cancellationToken).ConfigureAwait(false);
-        var byIp = reachable.ToDictionary(item => item.IpAddress, StringComparer.OrdinalIgnoreCase);
-        foreach (var arpEntry in arp)
-        {
-            if (byIp.TryGetValue(arpEntry.IpAddress, out var device))
-            {
-                byIp[arpEntry.IpAddress] = device with
+                catch (OperationCanceledException) when (token.IsCancellationRequested) { throw; }
+                catch (Exception ex) when (ex is System.Net.NetworkInformation.PingException or System.Net.Sockets.SocketException or TimeoutException)
                 {
-                    MacAddress = arpEntry.MacAddress,
-                    Manufacturer = OuiResolver.Resolve(arpEntry.MacAddress),
-                    DeviceType = InferDeviceType(OuiResolver.Resolve(arpEntry.MacAddress))
-                };
-            }
-            else
+                    Interlocked.Increment(ref probeErrors);
+                }
+                var count = Interlocked.Increment(ref completed);
+                progress?.Report(new ActionProgress($"ICMP: {count}/{addresses.Count} IPs", count * 80d / Math.Max(1, addresses.Count)));
+            }).ConfigureAwait(false);
+        if (probeErrors > 0) warnings.Add($"ICMP indisponível em {probeErrors} consulta(s); firewall ou roteamento podem limitar a descoberta.");
+
+        cancellationToken.ThrowIfCancellationRequested();
+        progress?.Report(new ActionProgress("Consultando cache ARP da interface selecionada…", 82));
+        try
+        {
+            var arpText = await _backend.ReadArpAsync(current, cancellationToken).ConfigureAwait(false);
+            foreach (var entry in NetworkArpParser.Parse(arpText, current))
             {
-                byIp[arpEntry.IpAddress] = new NetworkDeviceInfo(
-                    arpEntry.IpAddress,
-                    arpEntry.MacAddress,
-                    OuiResolver.Resolve(arpEntry.MacAddress),
-                    string.Empty,
-                    InferDeviceType(OuiResolver.Resolve(arpEntry.MacAddress)),
-                    false,
-                    null,
-                    DateTimeOffset.Now);
+                if (entry.IpAddress == current.LocalAddress) continue;
+                if (devices.TryGetValue(entry.IpAddress, out var device))
+                    devices[entry.IpAddress] = device with { MacAddress = entry.MacAddress,
+                        Manufacturer = OuiResolver.Resolve(entry.MacAddress), Evidence = "Resposta ICMP + cache ARP" };
+                else
+                    devices[entry.IpAddress] = new NetworkDeviceInfo(entry.IpAddress, entry.MacAddress,
+                        OuiResolver.Resolve(entry.MacAddress), "", "Tipo desconhecido", false, null, DateTimeOffset.UtcNow)
+                    { WasProbed = candidates.Contains(entry.IpAddress), Evidence = "Cache ARP; pode estar desatualizado" };
             }
         }
-
-        return byIp.Values.OrderBy(item => item.IpAddress, StringComparer.OrdinalIgnoreCase).ToArray();
-    }
-
-    private static (IPAddress[] HostAddresses, IPAddress LocalAddress) GetActiveSubnet()
-    {
-        var active = NetworkInterface.GetAllNetworkInterfaces()
-            .Where(network => network.OperationalStatus == OperationalStatus.Up)
-            .Where(network => network.NetworkInterfaceType is not NetworkInterfaceType.Loopback)
-            .SelectMany(network => network.GetIPProperties().UnicastAddresses)
-            .FirstOrDefault(address => address.Address.AddressFamily == AddressFamily.InterNetwork &&
-                                       !IPAddress.IsLoopback(address.Address) &&
-                                       !address.Address.ToString().StartsWith("169.254.", StringComparison.Ordinal));
-        if (active is null) throw new InvalidOperationException("Nenhuma interface IPv4 ativa foi encontrada.");
-
-        var ipBytes = active.Address.GetAddressBytes();
-        var maskBytes = active.IPv4Mask.GetAddressBytes();
-        var networkBytes = new byte[4];
-        var broadcastBytes = new byte[4];
-        for (var index = 0; index < 4; index++)
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested) { throw; }
+        catch (Exception ex) when (ex is InvalidOperationException or System.ComponentModel.Win32Exception or System.IO.IOException or OperationCanceledException or TimeoutException)
         {
-            networkBytes[index] = (byte)(ipBytes[index] & maskBytes[index]);
-            broadcastBytes[index] = (byte)(networkBytes[index] | ~maskBytes[index]);
+            warnings.Add("Cache ARP indisponível: " + ex.Message);
         }
 
-        var start = BitConverter.ToUInt32(networkBytes.Reverse().ToArray());
-        var end = BitConverter.ToUInt32(broadcastBytes.Reverse().ToArray());
-        var hosts = new List<IPAddress>();
-        for (var value = start + 1; value < end && hosts.Count < 254; value++)
-        {
-            var bytes = BitConverter.GetBytes(value).Reverse().ToArray();
-            var address = new IPAddress(bytes);
-            if (!address.Equals(active.Address)) hosts.Add(address);
-        }
-
-        return (hosts.ToArray(), active.Address);
+        progress?.Report(new ActionProgress("Resolvendo nomes DNS (limite de 1 segundo por IP)…", 85));
+        var dnsFailures = 0;
+        var resolved = 0;
+        var snapshot = devices.Values.ToArray();
+        await Parallel.ForEachAsync(snapshot, new ParallelOptions { MaxDegreeOfParallelism = 8, CancellationToken = cancellationToken },
+            async (device, token) =>
+            {
+                try
+                {
+                    var name = await _backend.ResolveNameAsync(device.IpAddress, token)
+                        .WaitAsync(TimeSpan.FromSeconds(1), token).ConfigureAwait(false);
+                    devices[device.IpAddress] = device with { HostName = name };
+                }
+                catch (OperationCanceledException) when (token.IsCancellationRequested) { throw; }
+                catch (Exception ex) when (ex is System.Net.Sockets.SocketException or TimeoutException or OperationCanceledException)
+                {
+                    Interlocked.Increment(ref dnsFailures);
+                }
+                var count = Interlocked.Increment(ref resolved);
+                progress?.Report(new ActionProgress($"DNS: {count}/{snapshot.Length} IPs", 85 + count * 15d / Math.Max(1, snapshot.Length)));
+            }).ConfigureAwait(false);
+        cancellationToken.ThrowIfCancellationRequested();
+        if (dnsFailures > 0) warnings.Add($"Nome DNS indisponível para {dnsFailures} host(s). IPs e evidências foram preservados.");
+        progress?.Report(new ActionProgress("Varredura concluída.", 100));
+        return new NetworkScanResult(devices.Values.OrderBy(d => NetworkAddressing.ToUInt32(d.IpAddress)).ToArray(),
+            warnings, current.ScanCidr, completed);
     }
 
-    private static async Task<IReadOnlyList<(string IpAddress, string MacAddress)>> ReadArpTableAsync(CancellationToken cancellationToken)
+    private async Task RequireConsentAsync(CancellationToken token)
     {
-        var startInfo = new ProcessStartInfo
-        {
-            FileName = "arp.exe",
-            Arguments = "-a",
-            UseShellExecute = false,
-            RedirectStandardOutput = true,
-            CreateNoWindow = true
-        };
-        using var process = Process.Start(startInfo) ?? throw new InvalidOperationException("Não foi possível consultar a tabela ARP.");
-        var output = await process.StandardOutput.ReadToEndAsync(cancellationToken).ConfigureAwait(false);
-        await process.WaitForExitAsync(cancellationToken).ConfigureAwait(false);
-        return ArpLine.Matches(output)
-            .Select(match => (match.Groups["ip"].Value, match.Groups["mac"].Value))
-            .Where(item => !item.Item1.EndsWith(".255", StringComparison.Ordinal))
-            .Distinct()
-            .ToArray();
+        token.ThrowIfCancellationRequested();
+        if (!await _consentStore.HasConsentAsync(token).ConfigureAwait(false))
+            throw new InvalidOperationException("A varredura exige consentimento explícito para a rede local.");
+        token.ThrowIfCancellationRequested();
     }
-
-    private static string InferDeviceType(string manufacturer) => manufacturer switch
-    {
-        "Apple" => "Computador ou celular",
-        "Raspberry Pi" => "IoT ou computador",
-        "Cisco" => "Rede",
-        _ => "Dispositivo de rede"
-    };
 }

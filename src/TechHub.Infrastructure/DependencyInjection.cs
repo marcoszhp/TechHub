@@ -12,6 +12,7 @@ using TechHub.Infrastructure.Security;
 using TechHub.Infrastructure.Software;
 using TechHub.Infrastructure.Storage;
 using TechHub.Infrastructure.Support;
+using TechHub.Infrastructure.Workspace;
 
 namespace TechHub.Infrastructure;
 
@@ -39,6 +40,7 @@ public static class DependencyInjection
         services.AddSingleton<IAutomationService, JsonAutomationService>();
         services.AddSingleton<IDiagnosticAssistant, OfflineDiagnosticAssistant>();
         services.AddSingleton<ISubnetCalculator, SubnetCalculator>();
+        services.AddTechHubWorkspace();
         return services;
     }
 }

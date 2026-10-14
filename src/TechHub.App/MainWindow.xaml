@@ -2,25 +2,28 @@
                  xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                  xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+                 xmlns:views="clr-namespace:TechHub.App.Views"
                  Title="TechHub — Manutenção e Suporte"
-                 Width="1180"
-                 Height="760"
-                 MinWidth="900"
-                 MinHeight="600"
+                 Width="1360"
+                 Height="860"
+                 MinWidth="1080"
+                 MinHeight="700"
+                 FontFamily="Segoe UI"
+                 Foreground="#172B42"
+                 Background="#F3F6FA"
+                 ExtendsContentIntoTitleBar="True"
                  WindowStartupLocation="CenterScreen">
-    <Grid Margin="24">
+    <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <StackPanel Margin="0,0,0,20">
-            <TextBlock FontSize="28" FontWeight="SemiBold" Text="TechHub" />
-            <TextBlock Foreground="#667085" Text="Central de manutenção e suporte para Windows" />
-        </StackPanel>
+        <ui:TitleBar Grid.Row="0" Title="TechHub — Manutenção e Suporte" />
 
-        <TabControl Grid.Row="1" TabStripPlacement="Left" Padding="12">
-            <TabItem Header="Dashboard">
+        <TabControl x:Name="Navigation" Grid.Row="1" Style="{StaticResource HubNavigation}" SelectionChanged="OnNavigationChanged">
+            <TabItem Header="Dashboard" Uid="dashboard" Tag="&#xE80F;">
                 <ScrollViewer VerticalScrollBarVisibility="Auto">
                     <StackPanel Margin="24,8,8,8">
                         <DockPanel Margin="0,0,0,18">
@@ -33,26 +36,26 @@
                         <UniformGrid Columns="4" Margin="0,0,0,16">
                             <Border Margin="0,0,10,0" Padding="16" Background="#EEF4FF" CornerRadius="10">
                                 <StackPanel>
-                                    <TextBlock Text="Nota de saúde" />
-                                    <TextBlock FontSize="30" FontWeight="Bold" Text="{Binding Dashboard.HealthScore}" />
+                                    <TextBlock Text="Índice de recursos¹" />
+                                    <TextBlock FontSize="30" FontWeight="Bold" Text="{Binding Dashboard.HealthScore, TargetNullValue=—}" />
                                 </StackPanel>
                             </Border>
                             <Border Margin="0,0,10,0" Padding="16" Background="#F5F3FF" CornerRadius="10">
                                 <StackPanel>
                                     <TextBlock Text="CPU" />
-                                    <TextBlock FontSize="24" Text="{Binding Dashboard.CpuUsagePercent, StringFormat={}{0:0.0}%}" />
+                                    <TextBlock FontSize="24" Text="{Binding Dashboard.CpuUsagePercent, StringFormat={}{0:0.0}%, TargetNullValue=—}" />
                                 </StackPanel>
                             </Border>
                             <Border Margin="0,0,10,0" Padding="16" Background="#ECFDF3" CornerRadius="10">
                                 <StackPanel>
                                     <TextBlock Text="Memória" />
-                                    <TextBlock FontSize="24" Text="{Binding Dashboard.MemoryUsagePercent, StringFormat={}{0:0.0}%}" />
+                                    <TextBlock FontSize="24" Text="{Binding Dashboard.MemoryUsagePercent, StringFormat={}{0:0.0}%, TargetNullValue=—}" />
                                 </StackPanel>
                             </Border>
                             <Border Padding="16" Background="#FFF7ED" CornerRadius="10">
                                 <StackPanel>
                                     <TextBlock Text="Disco do sistema" />
-                                    <TextBlock FontSize="24" Text="{Binding Dashboard.DiskUsagePercent, StringFormat={}{0:0.0}%}" />
+                                    <TextBlock FontSize="24" Text="{Binding Dashboard.DiskUsagePercent, StringFormat={}{0:0.0}%, TargetNullValue=—}" />
                                 </StackPanel>
                             </Border>
                         </UniformGrid>
@@ -67,17 +70,21 @@
                             <ItemsControl Margin="12" ItemsSource="{Binding Dashboard.Alerts}">
                                 <ItemsControl.ItemTemplate>
                                     <DataTemplate>
-                                        <TextBlock Text="•  {Binding}" />
+                                        <TextBlock Text="{Binding StringFormat=•  {0}}" TextWrapping="Wrap" />
                                     </DataTemplate>
                                 </ItemsControl.ItemTemplate>
                             </ItemsControl>
                         </GroupBox>
                         <TextBlock Margin="0,12,0,0" Foreground="#667085" Text="{Binding Dashboard.StatusMessage}" />
+                        <TextBlock Margin="0,12,0,0" FontSize="11" Foreground="#667085" Text="¹ Estimativa baseada em CPU, memória e espaço em disco. Não substitui diagnóstico de hardware ou segurança." TextWrapping="Wrap" />
                     </StackPanel>
                 </ScrollViewer>
             </TabItem>
 
-            <TabItem Header="Impressoras">
+            <TabItem Header="Informações do PC" Uid="computer" Tag="&#xE7F4;"><views:WorkspaceView DataContext="{Binding Workspace}" /></TabItem>
+            <TabItem Header="Mapa de rede" Uid="network" Tag="&#xE968;"><views:NetworkView DataContext="{Binding Network}" /></TabItem>
+            <TabItem Header="Central técnica" Uid="tools" Tag="&#xE713;"><views:WorkspaceView DataContext="{Binding Workspace}" /></TabItem>
+            <TabItem Header="Impressoras" Uid="printers" Tag="&#xE749;">
                 <Grid Margin="24,8,8,8">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
@@ -107,47 +114,17 @@
                                 <ColumnDefinition Width="*" />
                                 <ColumnDefinition Width="Auto" />
                             </Grid.ColumnDefinitions>
-                            <TextBox Margin="0,0,8,0" Text="{Binding Printers.IpAddress, UpdateSourceTrigger=PropertyChanged}" ToolTip="Endereço IPv4" />
-                            <TextBox Grid.Column="1" Margin="0,0,8,0" Text="{Binding Printers.PrinterName, UpdateSourceTrigger=PropertyChanged}" ToolTip="Nome opcional" />
-                            <Button Grid.Column="2" Command="{Binding Printers.InstallByIpCommand}" Content="Instalar por IP" />
+                            <Grid.RowDefinitions><RowDefinition /><RowDefinition Height="Auto" /></Grid.RowDefinitions>
+                            <StackPanel Margin="0,0,8,0"><TextBlock Text="Endereço IPv4 da impressora" /><TextBox Text="{Binding Printers.IpAddress, UpdateSourceTrigger=PropertyChanged}" AutomationProperties.Name="IP da impressora" /></StackPanel>
+                            <StackPanel Grid.Column="1" Margin="0,0,8,0"><TextBlock Text="Nome (opcional)" /><TextBox Text="{Binding Printers.PrinterName, UpdateSourceTrigger=PropertyChanged}" AutomationProperties.Name="Nome da impressora" /></StackPanel>
+                            <Button Grid.Column="2" VerticalAlignment="Bottom" Command="{Binding Printers.InstallByIpCommand}" Content="Instalar por IP" />
+                            <TextBlock Grid.Row="1" Grid.ColumnSpan="3" Text="{Binding Printers.StatusMessage}" TextWrapping="Wrap" Margin="0,10,0,0" />
                         </Grid>
                     </Border>
                 </Grid>
             </TabItem>
 
-            <TabItem Header="Rede">
-                <Grid Margin="24,8,8,8">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="*" />
-                    </Grid.RowDefinitions>
-                    <DockPanel Margin="0,0,0,12">
-                        <Button Width="120" HorizontalAlignment="Right" Command="{Binding Network.ScanCommand}" Content="Varredura" DockPanel.Dock="Right" IsEnabled="{Binding Network.HasConsent}" />
-                        <StackPanel>
-                            <TextBlock FontSize="22" FontWeight="SemiBold" Text="Rede local" />
-                            <TextBlock Foreground="#667085" Text="Descoberta consentida de dispositivos na sub-rede ativa." />
-                        </StackPanel>
-                    </DockPanel>
-                    <Border Grid.Row="1" Margin="0,0,0,12" Padding="14" Background="#FFF7ED" CornerRadius="8">
-                        <DockPanel>
-                            <Button Width="160" HorizontalAlignment="Right" Command="{Binding Network.GrantConsentCommand}" Content="Registrar consentimento" DockPanel.Dock="Right" />
-                            <TextBlock VerticalAlignment="Center" Text="A primeira varredura requer confirmação explícita. Nenhum host é consultado antes disso." TextWrapping="Wrap" />
-                        </DockPanel>
-                    </Border>
-                    <DataGrid Grid.Row="2" AutoGenerateColumns="False" CanUserAddRows="False" IsReadOnly="True" ItemsSource="{Binding Network.Devices}">
-                        <DataGrid.Columns>
-                            <DataGridTextColumn Binding="{Binding IpAddress}" Header="IP" Width="*" />
-                            <DataGridTextColumn Binding="{Binding MacAddress}" Header="MAC" Width="1.3*" />
-                            <DataGridTextColumn Binding="{Binding Manufacturer}" Header="Fabricante" Width="1.5*" />
-                            <DataGridTextColumn Binding="{Binding DeviceType}" Header="Tipo" Width="1.5*" />
-                            <DataGridTextColumn Binding="{Binding LatencyMilliseconds, StringFormat={}{0} ms}" Header="Latência" Width="*" />
-                        </DataGrid.Columns>
-                    </DataGrid>
-                </Grid>
-            </TabItem>
-
-            <TabItem Header="Diagnóstico">
+            <TabItem Header="Diagnóstico" Uid="diagnostics" Tag="&#xE9D9;">
                 <Grid Margin="24,8,8,8">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
@@ -181,14 +158,14 @@
                             </DataGrid>
                         </GroupBox>
                         <GroupBox Grid.Column="1" Margin="8,0,0,0" Header="Recomendações">
-                            <ItemsControl Margin="12" ItemsSource="{Binding Diagnostics.Recommendations}"><ItemsControl.ItemTemplate><DataTemplate><TextBlock Margin="0,0,0,6" Text="•  {Binding}" TextWrapping="Wrap" /></DataTemplate></ItemsControl.ItemTemplate></ItemsControl>
+                            <ItemsControl Margin="12" ItemsSource="{Binding Diagnostics.Recommendations}"><ItemsControl.ItemTemplate><DataTemplate><TextBlock Margin="0,0,0,6" Text="{Binding StringFormat=•  {0}}" TextWrapping="Wrap" /></DataTemplate></ItemsControl.ItemTemplate></ItemsControl>
                         </GroupBox>
                     </Grid>
                     <TextBlock Grid.Row="3" Margin="0,12,0,0" Foreground="#667085" Text="{Binding Diagnostics.StatusMessage}" />
                 </Grid>
             </TabItem>
 
-            <TabItem Header="Segurança">
+            <TabItem Header="Segurança" Uid="security" Tag="&#xE72E;">
                 <ScrollViewer Margin="24,8,8,8" VerticalScrollBarVisibility="Auto">
                     <StackPanel>
                         <DockPanel Margin="0,0,0,12">
@@ -196,13 +173,13 @@
                             <StackPanel><TextBlock FontSize="22" FontWeight="SemiBold" Text="Segurança do Windows" /><TextBlock Foreground="#667085" Text="Estado local; o TechHub não envia telemetria." /></StackPanel>
                         </DockPanel>
                         <UniformGrid Columns="3" Margin="0,0,0,12">
-                            <Border Margin="0,0,10,10" Padding="14" Background="#F8FAFC" CornerRadius="8"><StackPanel><TextBlock Text="Defender" /><TextBlock FontSize="18" Text="{Binding Security.DefenderEnabled}" /><TextBlock Text="Proteção em tempo real" /><TextBlock Text="{Binding Security.RealTimeProtectionEnabled}" /></StackPanel></Border>
-                            <Border Margin="0,0,10,10" Padding="14" Background="#F8FAFC" CornerRadius="8"><StackPanel><TextBlock Text="Firewall" /><TextBlock FontSize="18" Text="{Binding Security.FirewallEnabled}" /><TextBlock Text="BitLocker" /><TextBlock Text="{Binding Security.BitLockerEnabled}" /></StackPanel></Border>
-                            <Border Padding="14" Background="#F8FAFC" CornerRadius="8"><StackPanel><TextBlock Text="Dispositivo" /><TextBlock Text="TPM" /><TextBlock Text="{Binding Security.TpmPresent}" /><TextBlock Text="Secure Boot" /><TextBlock Text="{Binding Security.SecureBootEnabled}" /></StackPanel></Border>
+                            <Border Margin="0,0,10,10" Padding="14" Background="#F8FAFC" CornerRadius="8"><StackPanel><TextBlock Text="Defender" /><TextBlock FontSize="16" Text="{Binding Security.DefenderEnabled, Converter={StaticResource SecurityStatus}}" /><TextBlock Text="Proteção em tempo real" /><TextBlock Text="{Binding Security.RealTimeProtectionEnabled, Converter={StaticResource SecurityStatus}}" /></StackPanel></Border>
+                            <Border Margin="0,0,10,10" Padding="14" Background="#F8FAFC" CornerRadius="8"><StackPanel><TextBlock Text="Firewall" /><TextBlock FontSize="16" Text="{Binding Security.FirewallEnabled, Converter={StaticResource SecurityStatus}}" /><TextBlock Text="BitLocker" /><TextBlock Text="{Binding Security.BitLockerEnabled, Converter={StaticResource SecurityStatus}}" /></StackPanel></Border>
+                            <Border Padding="14" Background="#F8FAFC" CornerRadius="8"><StackPanel><TextBlock Text="Dispositivo" /><TextBlock Text="TPM" /><TextBlock Text="{Binding Security.TpmPresent, Converter={StaticResource SecurityStatus}}" /><TextBlock Text="Secure Boot" /><TextBlock Text="{Binding Security.SecureBootEnabled, Converter={StaticResource SecurityStatus}}" /></StackPanel></Border>
                         </UniformGrid>
                         <Button Width="210" HorizontalAlignment="Left" Command="{Binding Security.QuickScanCommand}" Content="Solicitar varredura rápida" />
                         <GroupBox Margin="0,16,0,0" Header="Alertas">
-                            <ItemsControl Margin="12" ItemsSource="{Binding Security.Warnings}"><ItemsControl.ItemTemplate><DataTemplate><TextBlock Margin="0,0,0,6" Text="•  {Binding}" TextWrapping="Wrap" /></DataTemplate></ItemsControl.ItemTemplate></ItemsControl>
+                            <ItemsControl Margin="12" ItemsSource="{Binding Security.Warnings}"><ItemsControl.ItemTemplate><DataTemplate><TextBlock Margin="0,0,0,6" Text="{Binding StringFormat=•  {0}}" TextWrapping="Wrap" /></DataTemplate></ItemsControl.ItemTemplate></ItemsControl>
                         </GroupBox>
                         <StackPanel Margin="0,12,0,0" Orientation="Horizontal"><TextBlock Foreground="#667085" Text="Administradores locais detectados: " /><TextBlock Foreground="#667085" Text="{Binding Security.LocalAdministratorCount}" /></StackPanel>
                         <TextBlock Margin="0,6,0,0" Foreground="#667085" Text="{Binding Security.StatusMessage}" TextWrapping="Wrap" />
@@ -210,7 +187,7 @@
                 </ScrollViewer>
             </TabItem>
 
-            <TabItem Header="Drivers">
+            <TabItem Header="Drivers" Uid="drivers" Tag="&#xE964;">
                 <Grid Margin="24,8,8,8">
                     <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="*" /><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /></Grid.RowDefinitions>
                     <DockPanel Margin="0,0,0,12">
@@ -221,36 +198,59 @@
                         <DataGrid.Columns><DataGridTextColumn Binding="{Binding DeviceName}" Header="Dispositivo" Width="2*" /><DataGridTextColumn Binding="{Binding Manufacturer}" Header="Fabricante" Width="1.3*" /><DataGridTextColumn Binding="{Binding Provider}" Header="Fornecedor" Width="1.3*" /><DataGridTextColumn Binding="{Binding Version}" Header="Versão" Width="*" /><DataGridCheckBoxColumn Binding="{Binding HasProblem}" Header="Problema" Width="Auto" /></DataGrid.Columns>
                     </DataGrid>
                     <Border Grid.Row="2" Margin="0,12,0,0" Padding="12" Background="#F8FAFC" CornerRadius="8">
-                        <Grid><Grid.ColumnDefinitions><ColumnDefinition Width="2*" /><ColumnDefinition Width="Auto" /><ColumnDefinition Width="2*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions><TextBox Margin="0,0,8,0" Text="{Binding Drivers.InfPath, UpdateSourceTrigger=PropertyChanged}" ToolTip="Caminho local do INF assinado" /><Button Grid.Column="1" Margin="0,0,12,0" Command="{Binding Drivers.InstallOfflineCommand}" Content="Verificar e instalar INF" /><TextBox Grid.Column="2" Margin="0,0,8,0" Text="{Binding Drivers.BackupDestination, UpdateSourceTrigger=PropertyChanged}" ToolTip="Diretório vazio de backup" /><Button Grid.Column="3" Command="{Binding Drivers.BackupCommand}" Content="Backup" /></Grid>
+                        <StackPanel>
+                            <TextBlock Text="Instalar pacote local assinado (INF)" />
+                            <DockPanel><Button DockPanel.Dock="Right" Margin="8,0,0,0" Command="{Binding Drivers.InstallOfflineCommand}" Content="Verificar e instalar" /><TextBox Text="{Binding Drivers.InfPath, UpdateSourceTrigger=PropertyChanged}" AutomationProperties.Name="Caminho do arquivo INF assinado" /></DockPanel>
+                            <Grid Margin="0,12,0,0"><Grid.ColumnDefinitions><ColumnDefinition Width="150" /><ColumnDefinition /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                                <StackPanel Margin="0,0,8,0"><TextBlock Text="INF publicado (oem#.inf)" /><TextBox Text="{Binding Drivers.BackupInfName, UpdateSourceTrigger=PropertyChanged}" AutomationProperties.Name="INF publicado para backup" /></StackPanel>
+                                <StackPanel Grid.Column="1"><TextBlock Text="Pasta vazia de destino" /><TextBox Text="{Binding Drivers.BackupDestination, UpdateSourceTrigger=PropertyChanged}" AutomationProperties.Name="Pasta de backup de drivers" /></StackPanel>
+                                <Button Grid.Column="2" VerticalAlignment="Bottom" Margin="8,0,0,0" Command="{Binding Drivers.BackupCommand}" Content="Fazer backup" />
+                            </Grid>
+                        </StackPanel>
                     </Border>
                     <TextBlock Grid.Row="3" Margin="0,10,0,0" Foreground="#667085" Text="{Binding Drivers.StatusMessage}" TextWrapping="Wrap" />
                 </Grid>
             </TabItem>
 
-            <TabItem Header="Limpeza">
+            <TabItem Header="Limpeza" Uid="cleaning" Tag="&#xEA99;">
                 <Grid Margin="24,8,8,8">
                     <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /><RowDefinition Height="*" /><RowDefinition Height="Auto" /></Grid.RowDefinitions>
                     <DockPanel Margin="0,0,0,12">
                         <Button Width="120" HorizontalAlignment="Right" Command="{Binding Cleaning.AnalyzeCommand}" Content="Gerar prévia" DockPanel.Dock="Right" />
                         <StackPanel><TextBlock FontSize="22" FontWeight="SemiBold" Text="Limpeza controlada" /><TextBlock Foreground="#667085" Text="A análise não apaga arquivos; a execução exige confirmação e ponto de restauração." /></StackPanel>
                     </DockPanel>
-                    <Grid Grid.Row="1" Margin="0,0,0,12"><Grid.ColumnDefinitions><ColumnDefinition Width="Auto" /><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions><TextBlock Margin="0,0,8,0" VerticalAlignment="Center" Text="Modo:" /><ComboBox Width="120" ItemsSource="{Binding Cleaning.Modes}" SelectedItem="{Binding Cleaning.Mode}" /><Button Grid.Column="2" Command="{Binding Cleaning.ExecuteCommand}" Content="Executar prévia" /></Grid>
+                    <Grid Grid.Row="1" Margin="0,0,0,12"><Grid.ColumnDefinitions><ColumnDefinition Width="Auto" /><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions><TextBlock Margin="0,0,8,0" VerticalAlignment="Center" Text="Modo:" /><ComboBox Grid.Column="1" HorizontalAlignment="Left" Width="120" ItemsSource="{Binding Cleaning.Modes}" SelectedItem="{Binding Cleaning.Mode}" /><Button Grid.Column="2" Command="{Binding Cleaning.ExecuteCommand}" Content="Executar prévia" /></Grid>
                     <Grid Grid.Row="2"><Grid.ColumnDefinitions><ColumnDefinition Width="280" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions><GroupBox Margin="0,0,10,0" Header="Escopos"><ItemsControl Margin="10" ItemsSource="{Binding Cleaning.Scopes}"><ItemsControl.ItemTemplate><DataTemplate><CheckBox Margin="0,0,0,7" Content="{Binding Label}" IsChecked="{Binding IsSelected}" /></DataTemplate></ItemsControl.ItemTemplate></ItemsControl></GroupBox><DataGrid Grid.Column="1" AutoGenerateColumns="False" CanUserAddRows="False" IsReadOnly="True" ItemsSource="{Binding Cleaning.Items}"><DataGrid.Columns><DataGridTextColumn Binding="{Binding Location}" Header="Arquivo" Width="2*" /><DataGridTextColumn Binding="{Binding Bytes}" Header="Bytes" Width="*" /><DataGridTextColumn Binding="{Binding Reason}" Header="Motivo" Width="1.5*" /></DataGrid.Columns></DataGrid></Grid>
                     <TextBlock Grid.Row="3" Margin="0,10,0,0" Foreground="#667085" Text="{Binding Cleaning.StatusMessage}" TextWrapping="Wrap" />
                 </Grid>
             </TabItem>
 
-            <TabItem Header="Atendimento">
-                <Grid Margin="24,8,8,8">
-                    <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /><RowDefinition Height="*" /><RowDefinition Height="Auto" /></Grid.RowDefinitions>
-                    <DockPanel Margin="0,0,0,12"><Button Width="120" HorizontalAlignment="Right" Command="{Binding Tickets.RefreshCommand}" Content="Atualizar" DockPanel.Dock="Right" /><StackPanel><TextBlock FontSize="22" FontWeight="SemiBold" Text="Central de Atendimento" /><TextBlock Foreground="#667085" Text="Chamados locais com histórico e diagnóstico anexável." /></StackPanel></DockPanel>
-                    <Grid Grid.Row="1" Margin="0,0,0,12"><Grid.ColumnDefinitions><ColumnDefinition Width="2*" /><ColumnDefinition Width="3*" /><ColumnDefinition Width="Auto" /><ColumnDefinition Width="Auto" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions><TextBox Margin="0,0,8,0" Text="{Binding Tickets.Title, UpdateSourceTrigger=PropertyChanged}" ToolTip="Título" /><TextBox Grid.Column="1" Margin="0,0,8,0" Text="{Binding Tickets.Description, UpdateSourceTrigger=PropertyChanged}" ToolTip="Descrição" /><ComboBox Grid.Column="2" Width="120" Margin="0,0,8,0" ItemsSource="{Binding Tickets.Categories}" SelectedItem="{Binding Tickets.Category}" /><ComboBox Grid.Column="3" Width="100" Margin="0,0,8,0" ItemsSource="{Binding Tickets.Priorities}" SelectedItem="{Binding Tickets.Priority}" /><Button Grid.Column="4" Command="{Binding Tickets.CreateCommand}" Content="Criar chamado" /></Grid>
-                    <DataGrid Grid.Row="2" AutoGenerateColumns="False" CanUserAddRows="False" IsReadOnly="True" ItemsSource="{Binding Tickets.Tickets}" SelectedItem="{Binding Tickets.SelectedTicket}"><DataGrid.Columns><DataGridTextColumn Binding="{Binding Id}" Header="#" Width="Auto" /><DataGridTextColumn Binding="{Binding Title}" Header="Título" Width="2*" /><DataGridTextColumn Binding="{Binding Category}" Header="Categoria" Width="*" /><DataGridTextColumn Binding="{Binding Priority}" Header="Prioridade" Width="*" /><DataGridTextColumn Binding="{Binding Status}" Header="Status" Width="*" /><DataGridTextColumn Binding="{Binding UpdatedAt}" Header="Atualizado" Width="1.4*" /></DataGrid.Columns></DataGrid>
-                    <Grid Grid.Row="3" Margin="0,12,0,0"><Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /><ColumnDefinition Width="Auto" /><ColumnDefinition Width="Auto" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions><TextBox Margin="0,0,8,0" Text="{Binding Tickets.Comment, UpdateSourceTrigger=PropertyChanged}" ToolTip="Comentário do técnico" /><Button Grid.Column="1" Margin="0,0,8,0" Command="{Binding Tickets.AddCommentCommand}" Content="Comentar" /><Button Grid.Column="2" Margin="0,0,8,0" Command="{Binding Tickets.CollectDiagnosticsCommand}" Content="Coletar diagnóstico" /><Button Grid.Column="3" Command="{Binding Tickets.SetResolvedCommand}" Content="Resolver" /><TextBlock Grid.Column="4" Margin="12,0,0,0" VerticalAlignment="Center" Foreground="#667085" Text="{Binding Tickets.StatusMessage}" /></Grid>
+            <TabItem Header="Clientes e equipamentos" Uid="clients" Tag="&#xE716;"><views:WorkspaceView DataContext="{Binding Workspace}" /></TabItem>
+            <TabItem Header="Atendimento" Uid="tickets" Tag="&#xE8F2;">
+                <Grid Margin="8">
+                    <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /><RowDefinition /><RowDefinition Height="135" /><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /></Grid.RowDefinitions>
+                    <DockPanel Margin="0,0,0,12"><Button DockPanel.Dock="Right" Command="{Binding Tickets.RefreshCommand}" Content="Atualizar" /><StackPanel><TextBlock FontSize="24" FontWeight="SemiBold" Text="Central de atendimento" /><TextBlock Foreground="#667085" Text="Chamados locais, comentários e diagnóstico anexável." /></StackPanel></DockPanel>
+                    <Grid Grid.Row="1" Margin="0,0,0,12"><Grid.ColumnDefinitions><ColumnDefinition Width="2*" /><ColumnDefinition Width="3*" /><ColumnDefinition Width="130" /><ColumnDefinition Width="110" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                        <StackPanel Margin="0,0,8,0"><TextBlock Text="Título" /><TextBox Text="{Binding Tickets.Title, UpdateSourceTrigger=PropertyChanged}" AutomationProperties.Name="Título do chamado" MaxLength="200" /></StackPanel>
+                        <StackPanel Grid.Column="1" Margin="0,0,8,0"><TextBlock Text="Descrição" /><TextBox Text="{Binding Tickets.Description, UpdateSourceTrigger=PropertyChanged}" AutomationProperties.Name="Descrição do chamado" MaxLength="4000" /></StackPanel>
+                        <StackPanel Grid.Column="2" Margin="0,0,8,0"><TextBlock Text="Categoria" /><ComboBox ItemsSource="{Binding Tickets.Categories}" SelectedItem="{Binding Tickets.Category}" /></StackPanel>
+                        <StackPanel Grid.Column="3" Margin="0,0,8,0"><TextBlock Text="Prioridade" /><ComboBox ItemsSource="{Binding Tickets.Priorities}" SelectedItem="{Binding Tickets.Priority}" /></StackPanel>
+                        <Button Grid.Column="4" VerticalAlignment="Bottom" Margin="0" Command="{Binding Tickets.CreateCommand}" Content="Criar" />
+                    </Grid>
+                    <DataGrid Grid.Row="2" AutoGenerateColumns="False" CanUserAddRows="False" IsReadOnly="True" ItemsSource="{Binding Tickets.Tickets}" SelectedItem="{Binding Tickets.SelectedTicket}">
+                        <DataGrid.Columns><DataGridTextColumn Binding="{Binding Id}" Header="#" Width="50" /><DataGridTextColumn Binding="{Binding Title}" Header="Título" Width="2*" /><DataGridTextColumn Binding="{Binding Category}" Header="Categoria" Width="*" /><DataGridTextColumn Binding="{Binding Priority}" Header="Prioridade" Width="*" /><DataGridTextColumn Binding="{Binding Status}" Header="Status" Width="*" /></DataGrid.Columns>
+                    </DataGrid>
+                    <Grid Grid.Row="3" Margin="0,10,0,0"><Grid.ColumnDefinitions><ColumnDefinition /><ColumnDefinition Width="2*" /></Grid.ColumnDefinitions>
+                        <ScrollViewer VerticalScrollBarVisibility="Auto" Margin="0,0,12,0"><StackPanel><TextBlock Text="DESCRIÇÃO" FontSize="11" FontWeight="SemiBold" /><TextBlock Text="{Binding Tickets.SelectedTicket.Description, TargetNullValue=Selecione um chamado}" TextWrapping="Wrap" /></StackPanel></ScrollViewer>
+                        <GroupBox Grid.Column="1" Header="Comentários"><ListBox ItemsSource="{Binding Tickets.Comments}" BorderThickness="0" ScrollViewer.HorizontalScrollBarVisibility="Disabled"><ListBox.ItemTemplate><DataTemplate><StackPanel><TextBlock FontSize="11" Foreground="#667085"><Run Text="{Binding Author}" /><Run Text=" · " /><Run Text="{Binding CreatedAt, StringFormat={}{0:dd/MM HH:mm}}" /></TextBlock><TextBlock Text="{Binding Body}" TextWrapping="Wrap" /></StackPanel></DataTemplate></ListBox.ItemTemplate></ListBox></GroupBox>
+                    </Grid>
+                    <DockPanel Grid.Row="4" Margin="0,10,0,0"><Button DockPanel.Dock="Right" Margin="8,0,0,0" Command="{Binding Tickets.SetResolvedCommand}" Content="Resolver" /><Button DockPanel.Dock="Right" Margin="8,0,0,0" Command="{Binding Tickets.CollectDiagnosticsCommand}" Content="Coletar diagnóstico" /><Button DockPanel.Dock="Right" Margin="8,0,0,0" Command="{Binding Tickets.AddCommentCommand}" Content="Comentar" /><TextBox Text="{Binding Tickets.Comment, UpdateSourceTrigger=PropertyChanged}" AutomationProperties.Name="Novo comentário" ToolTip="Escreva um comentário para o chamado selecionado" /></DockPanel>
+                    <TextBlock Grid.Row="5" Margin="0,10,0,0" Text="{Binding Tickets.StatusMessage}" Foreground="#667085" TextWrapping="Wrap" />
                 </Grid>
             </TabItem>
 
-            <TabItem Header="Relatórios">
+            <TabItem Header="Histórico de execução" Uid="history" Tag="&#xE81C;"><views:WorkspaceView DataContext="{Binding Workspace}" /></TabItem>
+            <TabItem Header="Relatórios" Uid="reports" Tag="&#xE9F9;">
                 <StackPanel Margin="24,8,8,8">
                     <TextBlock FontSize="22" FontWeight="SemiBold" Text="Relatórios e exportação" />
                     <TextBlock Margin="0,0,0,16" Foreground="#667085" Text="Exportação local dos chamados em formatos abertos." />
@@ -260,17 +260,17 @@
                 </StackPanel>
             </TabItem>
 
-            <TabItem Header="Software">
+            <TabItem Header="Software" Uid="software" Tag="&#xE71D;">
                 <Grid Margin="24,8,8,8">
                     <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="*" /><RowDefinition Height="Auto" /><RowDefinition Height="*" /></Grid.RowDefinitions>
-                    <DockPanel Margin="0,0,0,12"><StackPanel><TextBlock FontSize="22" FontWeight="SemiBold" Text="Software e atualizações" /><TextBlock Foreground="#667085" Text="Inventário do registro e atualizações via winget, sempre com confirmação." /></StackPanel><StackPanel Orientation="Horizontal" HorizontalAlignment="Right"><Button Margin="6,0,0,0" Command="{Binding Software.RefreshCommand}" Content="Inventário" /><Button Margin="6,0,0,0" Command="{Binding Software.CheckUpgradesCommand}" Content="Verificar atualizações" /><Button Margin="6,0,0,0" Command="{Binding Software.UpgradeAllCommand}" Content="Atualizar tudo" /></StackPanel></DockPanel>
+                    <StackPanel Margin="0,0,0,12"><TextBlock FontSize="22" FontWeight="SemiBold" Text="Software e atualizações" /><TextBlock Foreground="#667085" Text="Inventário do registro e atualizações via winget, sempre com confirmação." TextWrapping="Wrap" /><WrapPanel><Button Margin="0,8,8,0" Command="{Binding Software.RefreshCommand}" Content="Inventário" /><Button Margin="0,8,8,0" Command="{Binding Software.CheckUpgradesCommand}" Content="Verificar atualizações" /><Button Margin="0,8,0,0" Command="{Binding Software.UpgradeAllCommand}" Content="Atualizar tudo" /></WrapPanel></StackPanel>
                     <DataGrid Grid.Row="1" AutoGenerateColumns="False" CanUserAddRows="False" IsReadOnly="True" ItemsSource="{Binding Software.Software}"><DataGrid.Columns><DataGridTextColumn Binding="{Binding Name}" Header="Nome" Width="2*" /><DataGridTextColumn Binding="{Binding Version}" Header="Versão" Width="*" /><DataGridTextColumn Binding="{Binding Publisher}" Header="Fabricante" Width="1.5*" /><DataGridTextColumn Binding="{Binding Source}" Header="Origem" Width="1.5*" /></DataGrid.Columns></DataGrid>
                     <TextBlock Grid.Row="2" Margin="0,12,0,4" Foreground="#667085" Text="{Binding Software.UpgradeMessage}" TextWrapping="Wrap" />
                     <ListBox Grid.Row="3" ItemsSource="{Binding Software.UpgradeLines}" />
                 </Grid>
             </TabItem>
 
-            <TabItem Header="Automação">
+            <TabItem Header="Automação" Uid="automation" Tag="&#xE945;">
                 <Grid Margin="24,8,8,8">
                     <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="*" /><RowDefinition Height="Auto" /></Grid.RowDefinitions>
                     <DockPanel Margin="0,0,0,12"><Button Width="120" HorizontalAlignment="Right" Command="{Binding Automation.RefreshCommand}" Content="Atualizar" DockPanel.Dock="Right" /><StackPanel><TextBlock FontSize="22" FontWeight="SemiBold" Text="Automação" /><TextBlock Foreground="#667085" Text="Playbooks locais com ações aprovadas e confirmação." /></StackPanel></DockPanel>
@@ -279,12 +279,13 @@
                 </Grid>
             </TabItem>
 
-            <TabItem Header="Assistente">
+            <TabItem Header="Assistente" Uid="assistant" Tag="&#xE8F2;">
                 <ScrollViewer Margin="24,8,8,8" VerticalScrollBarVisibility="Auto">
                     <StackPanel>
                         <TextBlock FontSize="22" FontWeight="SemiBold" Text="Assistente de diagnóstico" />
                         <TextBlock Margin="0,0,0,12" Foreground="#667085" Text="Funciona offline por regras; não envia sintomas para serviços externos." TextWrapping="Wrap" />
-                        <DockPanel Margin="0,0,0,16"><TextBox Text="{Binding Assistant.Symptom, UpdateSourceTrigger=PropertyChanged}" ToolTip="Ex.: PC lento, sem internet, impressora não imprime" /><Button Width="100" Margin="8,0,0,0" Command="{Binding Assistant.AskCommand}" Content="Analisar" DockPanel.Dock="Right" /></DockPanel>
+                        <TextBlock Text="Descreva o sintoma (por exemplo, sem internet)" />
+                        <DockPanel Margin="0,0,0,16"><Button Width="100" Margin="8,0,0,0" Command="{Binding Assistant.AskCommand}" Content="Analisar" DockPanel.Dock="Right" /><TextBox Text="{Binding Assistant.Symptom, UpdateSourceTrigger=PropertyChanged}" AutomationProperties.Name="Sintoma para análise offline" /></DockPanel>
                         <TextBlock FontSize="18" FontWeight="SemiBold" Text="{Binding Assistant.Summary}" TextWrapping="Wrap" />
                         <GroupBox Margin="0,16,0,0" Header="Perguntas"><ItemsControl Margin="12" ItemsSource="{Binding Assistant.Questions}" /></GroupBox>
                         <GroupBox Margin="0,12,0,0" Header="Verificações recomendadas"><ItemsControl Margin="12" ItemsSource="{Binding Assistant.RecommendedChecks}" /></GroupBox>
@@ -292,6 +293,9 @@
                     </StackPanel>
                 </ScrollViewer>
             </TabItem>
+            <TabItem Header="Backup e restauração" Uid="backup" Tag="&#xE8B7;"><views:WorkspaceView DataContext="{Binding Workspace}" /></TabItem>
+            <TabItem Header="Configurações" Uid="settings" Tag="&#xE115;"><views:WorkspaceView DataContext="{Binding Workspace}" /></TabItem>
         </TabControl>
+        <Border Grid.Row="2" Background="#E8EEF5" Padding="18,4"><DockPanel><TextBlock DockPanel.Dock="Right" Foreground="#586D83" FontSize="11" Text="TechHub 1.1 · Ações de sistema exigem confirmação" /><TextBlock FontSize="11" Text="{Binding LoadStatus}" /></DockPanel></Border>
     </Grid>
 </ui:FluentWindow>

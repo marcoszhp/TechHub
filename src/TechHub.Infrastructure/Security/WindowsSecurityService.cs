@@ -23,7 +23,7 @@ public sealed class WindowsSecurityService(
                 $firewall = @()
                 $bitlocker = @()
                 $tpm = $null
-                $secureBoot = $false
+                $secureBoot = $null
                 $admins = @()
                 try { $defender = Get-MpComputerStatus -ErrorAction Stop } catch { }
                 try { $firewall = @(Get-NetFirewallProfile -ErrorAction Stop) } catch { }
@@ -34,11 +34,11 @@ public sealed class WindowsSecurityService(
                     try { $admins = @(Get-LocalGroupMember -Group 'Administrators' -ErrorAction Stop) } catch { }
                 }
                 [pscustomobject]@{
-                    DefenderEnabled = [bool]($defender.AntivirusEnabled)
-                    RealTimeProtectionEnabled = [bool]($defender.RealTimeProtectionEnabled)
-                    FirewallEnabled = (@($firewall | Where-Object { -not $_.Enabled }).Count -eq 0 -and $firewall.Count -gt 0)
-                    BitLockerEnabled = (@($bitlocker | Where-Object { $_.ProtectionStatus -eq 1 -or $_.VolumeStatus -eq 'FullyEncrypted' }).Count -gt 0)
-                    TpmPresent = [bool]($tpm.TpmPresent)
+                    DefenderEnabled = $(if ($null -eq $defender) { $null } else { [bool]$defender.AntivirusEnabled })
+                    RealTimeProtectionEnabled = $(if ($null -eq $defender) { $null } else { [bool]$defender.RealTimeProtectionEnabled })
+                    FirewallEnabled = $(if ($firewall.Count -eq 0) { $null } else { @($firewall | Where-Object { -not $_.Enabled }).Count -eq 0 })
+                    BitLockerEnabled = $(if ($bitlocker.Count -eq 0) { $null } else { @($bitlocker | Where-Object { $_.ProtectionStatus -eq 1 }).Count -gt 0 })
+                    TpmPresent = $(if ($null -eq $tpm) { $null } else { [bool]$tpm.TpmPresent })
                     SecureBootEnabled = $secureBoot
                     LocalAdministratorCount = @($admins).Count
                 } | ConvertTo-Json -Compress
@@ -47,17 +47,19 @@ public sealed class WindowsSecurityService(
             var payload = JsonSerializer.Deserialize<SecurityPayload>(json, JsonOptions);
             if (payload is null)
             {
-                return new SecuritySnapshot(false, false, false, false, false, false, 0,
+                return new SecuritySnapshot(null, null, null, null, null, null, 0,
                     ["O Windows não retornou dados de segurança válidos."], "Resposta inválida do PowerShell.");
             }
 
             var warnings = new List<string>();
-            if (!payload.DefenderEnabled) warnings.Add("Microsoft Defender não está ativo.");
-            if (!payload.RealTimeProtectionEnabled) warnings.Add("A proteção em tempo real está desativada.");
-            if (!payload.FirewallEnabled) warnings.Add("Um ou mais perfis do firewall estão desativados.");
-            if (!payload.BitLockerEnabled) warnings.Add("A unidade do sistema não aparece protegida pelo BitLocker.");
-            if (!payload.TpmPresent) warnings.Add("TPM não detectado.");
-            if (!payload.SecureBootEnabled) warnings.Add("Secure Boot não está ativo ou não pôde ser verificado.");
+            if (payload.DefenderEnabled == false) warnings.Add("Microsoft Defender não está ativo.");
+            if (payload.RealTimeProtectionEnabled == false) warnings.Add("A proteção em tempo real está desativada.");
+            if (payload.FirewallEnabled == false) warnings.Add("Um ou mais perfis do firewall estão desativados.");
+            if (payload.BitLockerEnabled == false) warnings.Add("A proteção BitLocker da unidade do sistema não está ativa.");
+            if (payload.TpmPresent == false) warnings.Add("TPM não detectado.");
+            if (payload.SecureBootEnabled == false) warnings.Add("Secure Boot não está ativo.");
+            if (new bool?[] { payload.DefenderEnabled, payload.RealTimeProtectionEnabled, payload.FirewallEnabled, payload.BitLockerEnabled, payload.TpmPresent, payload.SecureBootEnabled }.Any(value => value is null))
+                warnings.Add("Há controles não verificados. Permissões insuficientes ou recursos indisponíveis não significam proteção desativada.");
 
             return new SecuritySnapshot(
                 payload.DefenderEnabled,
@@ -76,7 +78,7 @@ public sealed class WindowsSecurityService(
         catch (Exception exception)
         {
             logger.LogError(exception, "Falha ao consultar o estado de segurança do Windows.");
-            return new SecuritySnapshot(false, false, false, false, false, false, 0,
+            return new SecuritySnapshot(null, null, null, null, null, null, 0,
                 ["Não foi possível ler todos os controles de segurança."], exception.Message);
         }
     }
@@ -101,11 +103,11 @@ public sealed class WindowsSecurityService(
     };
 
     private sealed record SecurityPayload(
-        bool DefenderEnabled,
-        bool RealTimeProtectionEnabled,
-        bool FirewallEnabled,
-        bool BitLockerEnabled,
-        bool TpmPresent,
-        bool SecureBootEnabled,
+        bool? DefenderEnabled,
+        bool? RealTimeProtectionEnabled,
+        bool? FirewallEnabled,
+        bool? BitLockerEnabled,
+        bool? TpmPresent,
+        bool? SecureBootEnabled,
         int LocalAdministratorCount);
 }

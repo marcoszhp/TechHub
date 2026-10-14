@@ -58,6 +58,8 @@ public sealed partial class PrintersViewModel : ObservableObject
             return;
         }
 
+        try
+        {
         var request = _printerService.CreateInstallByIpRequest(IpAddress, PrinterName);
         var preview = await _actionRunner.PreviewAsync(request).ConfigureAwait(true);
         if (!await _confirmationService.ConfirmAsync(preview).ConfigureAwait(true))
@@ -71,5 +73,7 @@ public sealed partial class PrintersViewModel : ObservableObject
             new ActionExecutionContext(true, false, Environment.UserName)).ConfigureAwait(true);
         StatusMessage = result.Success ? result.Message : $"Falha: {result.Message}";
         if (result.Success) await RefreshAsync().ConfigureAwait(true);
+        }
+        catch (Exception exception) { StatusMessage = $"Impressora não instalada: {exception.Message}"; }
     }
 }

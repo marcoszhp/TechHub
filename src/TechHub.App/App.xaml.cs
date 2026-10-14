@@ -17,6 +17,8 @@ public partial class App : Application
     protected override async void OnStartup(StartupEventArgs e)
     {
         base.OnStartup(e);
+        try
+        {
         var paths = new ApplicationPathsProvider();
 
         _host = Host.CreateDefaultBuilder(e.Args)
@@ -46,6 +48,7 @@ public partial class App : Application
                 services.AddSingleton<SoftwareViewModel>();
                 services.AddSingleton<AutomationViewModel>();
                 services.AddSingleton<AssistantViewModel>();
+                services.AddSingleton<WorkspaceViewModel>();
                 services.AddSingleton<MainViewModel>();
                 services.AddSingleton<MainWindow>();
             })
@@ -56,6 +59,13 @@ public partial class App : Application
         MainWindow = mainWindow;
         mainWindow.Show();
         await _host.Services.GetRequiredService<MainViewModel>().InitializeAsync();
+        }
+        catch (Exception exception)
+        {
+            Log.Fatal(exception, "Falha ao iniciar o TechHub");
+            MessageBox.Show($"O TechHub não conseguiu iniciar.\n\n{exception.Message}\n\nConsulte a pasta Logs em %LocalAppData%\\TechHub (ou Data no modo portátil).", "TechHub — falha na inicialização", MessageBoxButton.OK, MessageBoxImage.Error);
+            Shutdown(1);
+        }
     }
 
     protected override async void OnExit(ExitEventArgs e)

@@ -15,8 +15,15 @@ public sealed class MainViewModel(
     ReportsViewModel reports,
     SoftwareViewModel software,
     AutomationViewModel automation,
-    AssistantViewModel assistant) : ObservableObject
+    AssistantViewModel assistant,
+    WorkspaceViewModel workspace) : ObservableObject
 {
+    private readonly HashSet<string> _loaded = [];
+    private readonly HashSet<string> _loading = [];
+    private string _currentModule = "dashboard";
+    private string _loadStatus = "Pronto · dados armazenados localmente";
+    public string LoadStatus { get => _loadStatus; private set => SetProperty(ref _loadStatus, value); }
+    public WorkspaceViewModel Workspace { get; } = workspace;
     public DashboardViewModel Dashboard { get; } = dashboard;
     public PrintersViewModel Printers { get; } = printers;
     public NetworkViewModel Network { get; } = network;
@@ -46,16 +53,42 @@ public sealed class MainViewModel(
         new("assistant", "Assistente", "Diagnóstico offline por regras")
     ];
 
-    public async Task InitializeAsync()
+    public Task InitializeAsync() => LoadModuleAsync("dashboard");
+
+    public async Task LoadModuleAsync(string module)
     {
-        await Dashboard.RefreshAsync().ConfigureAwait(true);
-        await Printers.RefreshAsync().ConfigureAwait(true);
-        await Network.InitializeAsync().ConfigureAwait(true);
-        await Diagnostics.RefreshAsync().ConfigureAwait(true);
-        await Security.RefreshAsync().ConfigureAwait(true);
-        await Drivers.RefreshAsync().ConfigureAwait(true);
-        await Tickets.RefreshAsync().ConfigureAwait(true);
-        await Software.RefreshAsync().ConfigureAwait(true);
-        await Automation.RefreshAsync().ConfigureAwait(true);
+        _currentModule = module;
+        if (module is "computer" or "tools" or "clients" or "history" or "backup" or "settings")
+        {
+            try { await Workspace.SetSectionAsync(module); }
+            catch (Exception ex) { LoadStatus = $"Não foi possível carregar o módulo: {ex.Message}"; }
+            return;
+        }
+        if (_loading.Contains(module)) { LoadStatus = "Consulta em andamento… você pode continuar navegando."; return; }
+        if (_loaded.Contains(module)) { LoadStatus = "Pronto · use Atualizar para consultar novamente"; return; }
+        _loading.Add(module);
+        LoadStatus = "Consultando dados locais… você pode continuar navegando.";
+        try
+        {
+            switch (module)
+            {
+                case "dashboard": await Dashboard.RefreshAsync(); break;
+                case "printers": await Printers.RefreshAsync(); break;
+                case "network": await Network.InitializeAsync(); break;
+                case "diagnostics": await Diagnostics.RefreshAsync(); break;
+                case "security": await Security.RefreshAsync(); break;
+                case "drivers": await Drivers.RefreshAsync(); break;
+                case "tickets": await Tickets.RefreshAsync(); break;
+                case "software": await Software.RefreshAsync(); break;
+                case "automation": await Automation.RefreshAsync(); break;
+            }
+            _loaded.Add(module);
+            if (_currentModule == module) LoadStatus = "Pronto · consulte o estado da operação na área de trabalho";
+        }
+        catch (Exception ex)
+        {
+            if (_currentModule == module) LoadStatus = $"Falha ao carregar: {ex.Message}. Selecione novamente para tentar.";
+        }
+        finally { _loading.Remove(module); }
     }
 }

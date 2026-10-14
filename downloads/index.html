@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="TechHub: central local de manutenção e suporte de TI para Windows. Download do instalador e da versão portátil.">
+  <title>TechHub — sua central de suporte para Windows</title>
+  <style>
+    :root{color-scheme:dark;--bg:#101e30;--ink:#f5f8fc;--muted:#b2c3d7;--line:#31465e;--accent:#5de0cf}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 system-ui,sans-serif}a{color:inherit}a:focus-visible{outline:3px solid var(--accent);outline-offset:5px}header,main,footer{max-width:1120px;margin:auto;padding:28px}header{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--line)}.brand{font-weight:800;font-size:28px;text-decoration:none;letter-spacing:-1px}.brand span{color:var(--accent)}nav a{color:var(--muted);font-size:14px;margin-left:20px}section{padding:58px 0}.eyebrow{color:var(--accent);font-size:12px;font-weight:700;letter-spacing:2px;text-transform:uppercase}h1{font-size:clamp(36px,6vw,66px);line-height:1.08;letter-spacing:-2px;max-width:850px;margin:18px 0 24px}h2{font-size:27px;line-height:1.2}h3{font-size:19px;margin:0 0 10px}.intro{max-width:690px;font-size:19px;color:var(--muted)}.actions{display:flex;gap:14px;flex-wrap:wrap;margin:30px 0 14px}.button{padding:14px 22px;border-radius:8px;background:var(--accent);color:#102735;font-weight:750;text-decoration:none}.button.alt{background:transparent;border:1px solid var(--line);color:var(--ink)}.button:hover{filter:brightness(1.1)}.fine{color:var(--muted);font-size:13px;max-width:800px}.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:22px}.card{border-top:2px solid var(--line);padding:24px 0}.card p{margin:0;color:var(--muted)}.number{color:var(--accent);font-size:12px;display:block;margin-bottom:16px}.downloads{border-top:1px solid var(--line)}.notes{max-width:850px;color:var(--muted)}.notes li{margin:10px 0}footer{border-top:1px solid var(--line);font-size:13px;color:var(--muted);display:flex;justify-content:space-between;gap:20px}@media(max-width:700px){header,main,footer{padding:22px}.grid{grid-template-columns:1fr}section{padding:36px 0}h1{letter-spacing:-1px}footer{display:block}nav a{margin-left:12px}.actions{flex-direction:column}.button{text-align:center}}
+  </style>
+</head>
+<body>
+  <header><a class="brand" href="#">tech<span>hub</span></a><nav aria-label="Navegação"><a href="#recursos">Recursos</a><a href="https://github.com/marcoszhp/TechHub">Código-fonte ↗</a></nav></header>
+  <main>
+    <section aria-labelledby="title">
+      <div class="eyebrow">Windows · versão 1.1.0 · aplicativo desktop</div>
+      <h1 id="title">Entenda a rede.<br>Organize o suporte.</h1>
+      <p class="intro">Uma central local para visualizar dispositivos, consultar o computador e reunir o trabalho técnico — com ações de sistema confirmadas por você.</p>
+      <div class="actions"><a class="button" href="https://github.com/marcoszhp/TechHub/releases/download/v1.1.0/TechHub-Setup-1.1.0.exe">Baixar instalador · Windows x64</a><a class="button alt" href="https://github.com/marcoszhp/TechHub/releases/download/v1.1.0/TechHub-Portable-1.1.0-win-x64.zip">Baixar versão portátil</a></div>
+      <p class="fine">Página hospedada no Cloudflare Pages. Os arquivos são distribuídos pelo GitHub Releases. Aplicativo sem certificado de assinatura digital; confira a origem e o SHA-256 antes de executar.</p>
+    </section>
+    <section id="recursos" class="grid" aria-label="Recursos do aplicativo">
+      <article class="card"><span class="number">01 / VISIBILIDADE</span><h3>Mapa de rede local</h3><p>Selecione um adaptador, autorize a descoberta e consulte IP, MAC e evidências dos hosts. Mapa lógico, lista de dispositivos e exportação CSV.</p></article>
+      <article class="card"><span class="number">02 / OPERAÇÃO</span><h3>Central técnica</h3><p>Informações do PC, ferramentas do Windows, diagnóstico de rede, inventário de drivers e software. Operações sensíveis pedem confirmação.</p></article>
+      <article class="card"><span class="number">03 / CONTINUIDADE</span><h3>Suporte organizado</h3><p>Clientes, equipamentos, chamados e histórico locais. Backup do banco e configurações, com recuperação em uma pasta vazia.</p></article>
+    </section>
+    <section class="downloads"><h2>Antes de começar</h2><ul class="notes"><li>Use em Windows x64. O pacote inclui o runtime .NET necessário ao aplicativo.</li><li>O instalador grava dados no perfil do usuário. Para a versão portátil, extraia o ZIP em uma pasta com permissão de escrita.</li><li>O mapa indica relações lógicas, não cabeamento físico. Hosts podem não responder a ICMP; nomes e fabricantes podem estar indisponíveis.</li><li>Backup cobre banco e configurações; não inclui anexos, relatórios ou logs. A restauração não substitui automaticamente o banco ativo.</li><li>Reparos, drivers e algumas consultas precisam de privilégios administrativos. Execute somente em computadores e redes que você está autorizado a administrar.</li></ul><p><a href="https://github.com/marcoszhp/TechHub/releases/tag/v1.1.0">Notas da versão e limitações</a> · <a href="https://github.com/marcoszhp/TechHub/releases/download/v1.1.0/SHA256SUMS.txt">Verificar integridade (SHA-256)</a></p></section>
+  </main>
+  <footer><span>TechHub · manutenção e suporte de TI</span><span>Dados locais. Sem telemetria automática.</span></footer>
+</body></html>

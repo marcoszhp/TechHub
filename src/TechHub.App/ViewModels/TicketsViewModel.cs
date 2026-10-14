@@ -44,8 +44,11 @@ public sealed partial class TicketsViewModel : ObservableObject
     {
         try
         {
+            var selectedId = SelectedTicket?.Id;
+            var refreshed = await _service.GetTicketsAsync().ConfigureAwait(true);
             Tickets.Clear();
-            foreach (var ticket in await _service.GetTicketsAsync().ConfigureAwait(true)) Tickets.Add(ticket);
+            foreach (var ticket in refreshed) Tickets.Add(ticket);
+            SelectedTicket = Tickets.FirstOrDefault(ticket => ticket.Id == selectedId);
             StatusMessage = $"{Tickets.Count} chamado(s) carregado(s).";
         }
         catch (Exception exception) { StatusMessage = $"Falha ao carregar chamados: {exception.Message}"; }
@@ -60,7 +63,13 @@ public sealed partial class TicketsViewModel : ObservableObject
     {
         Comments.Clear();
         if (ticket is null) return;
-        try { foreach (var comment in await _service.GetCommentsAsync(ticket.Id).ConfigureAwait(true)) Comments.Add(comment); }
+        try
+        {
+            var comments = await _service.GetCommentsAsync(ticket.Id).ConfigureAwait(true);
+            if (!ReferenceEquals(SelectedTicket, ticket)) return;
+            Comments.Clear();
+            foreach (var comment in comments) Comments.Add(comment);
+        }
         catch (Exception exception) { StatusMessage = $"Falha ao carregar comentários: {exception.Message}"; }
     }
 
@@ -95,7 +104,7 @@ public sealed partial class TicketsViewModel : ObservableObject
     private async Task CollectDiagnosticsAsync()
     {
         if (SelectedTicket is null) { StatusMessage = "Selecione um chamado."; return; }
-        try { StatusMessage = $"Diagnóstico anexado: {await _service.CollectDiagnosticsAsync(SelectedTicket.Id).ConfigureAwait(true)}"; await RefreshAsync().ConfigureAwait(true); }
+        try { var path = await _service.CollectDiagnosticsAsync(SelectedTicket.Id).ConfigureAwait(true); await RefreshAsync().ConfigureAwait(true); StatusMessage = $"Diagnóstico anexado: {path}"; }
         catch (Exception exception) { StatusMessage = $"Diagnóstico não coletado: {exception.Message}"; }
     }
 

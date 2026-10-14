@@ -1,12 +1,12 @@
 namespace TechHub.Core.Models;
 
 public sealed record SecuritySnapshot(
-    bool DefenderEnabled,
-    bool RealTimeProtectionEnabled,
-    bool FirewallEnabled,
-    bool BitLockerEnabled,
-    bool TpmPresent,
-    bool SecureBootEnabled,
+    bool? DefenderEnabled,
+    bool? RealTimeProtectionEnabled,
+    bool? FirewallEnabled,
+    bool? BitLockerEnabled,
+    bool? TpmPresent,
+    bool? SecureBootEnabled,
     int LocalAdministratorCount,
     IReadOnlyList<string> Warnings,
     string? Error = null)

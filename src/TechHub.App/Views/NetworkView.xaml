@@ -1,0 +1,170 @@
+<UserControl x:Class="TechHub.App.Views.NetworkView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             Loaded="OnLoaded" Unloaded="OnUnloaded" Background="#0B1220" Foreground="#E2E8F0">
+    <UserControl.Resources>
+        <Style TargetType="TextBlock">
+            <Setter Property="Foreground" Value="#E2E8F0"/>
+            <Setter Property="TextWrapping" Value="Wrap"/>
+        </Style>
+        <Style TargetType="Button">
+            <Setter Property="Margin" Value="0,0,8,6"/>
+            <Setter Property="Padding" Value="12,7"/>
+            <Setter Property="Background" Value="#1E3A5F"/>
+            <Setter Property="Foreground" Value="#F1F5F9"/>
+        </Style>
+        <Style x:Key="Caption" TargetType="TextBlock" BasedOn="{StaticResource {x:Type TextBlock}}">
+            <Setter Property="Foreground" Value="#94A3B8"/>
+            <Setter Property="Margin" Value="0,10,0,3"/>
+        </Style>
+        <DrawingBrush x:Key="MapGrid" TileMode="Tile" Viewport="0,0,24,24" ViewportUnits="Absolute">
+            <DrawingBrush.Drawing>
+                <DrawingGroup>
+                    <GeometryDrawing Brush="#0F1B2D" Geometry="M0,0 L24,0 24,24 0,24 Z"/>
+                    <GeometryDrawing Geometry="M0,24 L0,0 24,0">
+                        <GeometryDrawing.Pen><Pen Brush="#203149" Thickness="0.5"/></GeometryDrawing.Pen>
+                    </GeometryDrawing>
+                </DrawingGroup>
+            </DrawingBrush.Drawing>
+        </DrawingBrush>
+    </UserControl.Resources>
+    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
+        <StackPanel Margin="12" MinWidth="760">
+            <TextBlock Text="Mapa de rede" FontSize="24" FontWeight="SemiBold"/>
+            <TextBlock Text="Rede lógica IPv4 · linhas tracejadas indicam associação à sub-rede, não cabos ou conexões físicas."
+                       Margin="0,4,0,12" Foreground="#94A3B8"/>
+            <Grid>
+                <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                <ComboBox ItemsSource="{Binding Adapters}" SelectedItem="{Binding SelectedAdapter}"
+                          DisplayMemberPath="DisplayName" IsEnabled="{Binding CanEdit}" MinHeight="34" Margin="0,0,12,8"
+                          AutomationProperties.Name="Adaptador e endereço IPv4"/>
+                <Button Grid.Column="1" Content="Atualizar adaptadores" Command="{Binding RefreshAdaptersCommand}"/>
+            </Grid>
+            <TextBlock Text="{Binding AdapterSummary}"/>
+            <TextBlock Text="{Binding ScanRangeLabel}" Foreground="#94A3B8" Margin="0,4,0,8"/>
+            <CheckBox IsChecked="{Binding ConsentAcknowledged}" IsEnabled="{Binding CanEdit}" Foreground="#E2E8F0"
+                      AutomationProperties.Name="Confirmo autorização para consultar esta rede" Margin="0,4,0,8">
+                <TextBlock Text="Confirmo que tenho autorização para consultar a rede selecionada."/>
+            </CheckBox>
+            <TextBlock Text="{Binding ConsentLabel}" Foreground="#94A3B8" Margin="0,0,0,8"/>
+            <WrapPanel>
+                <Button Content="Registrar consentimento" Command="{Binding GrantConsentCommand}"/>
+                <Button Content="Varrer" Command="{Binding ScanCommand}"/>
+                <Button Content="Cancelar" Command="{Binding CancelCommand}"/>
+                <Button Content="Exportar CSV" Command="{Binding ExportCsvCommand}"/>
+            </WrapPanel>
+            <ProgressBar Minimum="0" Maximum="100" Value="{Binding Progress}" Height="8" Margin="0,4,0,8"
+                         AutomationProperties.Name="Progresso da varredura"/>
+            <TextBlock Text="{Binding StatusMessage}" AutomationProperties.LiveSetting="Polite" Margin="0,0,0,4"/>
+            <TextBlock Text="{Binding ScanSummary}" Foreground="#94A3B8" Margin="0,0,0,12"/>
+            <DockPanel Margin="0,0,0,8">
+                <TextBlock Text="Zoom" VerticalAlignment="Center" Margin="0,0,12,0"/>
+                <TextBlock DockPanel.Dock="Right" Text="{Binding Zoom, StringFormat={}{0:P0}}" Margin="12,0,0,0"/>
+                <Slider Minimum="0.5" Maximum="2" Value="{Binding Zoom}" TickFrequency="0.25"
+                        SmallChange="0.25" LargeChange="0.5" AutomationProperties.Name="Zoom do mapa"/>
+            </DockPanel>
+            <Grid>
+                <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="12"/><ColumnDefinition Width="260"/></Grid.ColumnDefinitions>
+                <Border BorderBrush="#334155" BorderThickness="1" Background="{StaticResource MapGrid}">
+                    <ScrollViewer Height="360" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto"
+                                  AutomationProperties.Name="Mapa lógico; lista equivalente abaixo">
+                        <Grid Width="{Binding CanvasWidth}" Height="{Binding CanvasHeight}">
+                            <Grid.LayoutTransform><ScaleTransform ScaleX="{Binding Zoom}" ScaleY="{Binding Zoom}"/></Grid.LayoutTransform>
+                            <ItemsControl ItemsSource="{Binding Nodes}" IsHitTestVisible="False" Focusable="False">
+                                <ItemsControl.ItemsPanel><ItemsPanelTemplate><Canvas/></ItemsPanelTemplate></ItemsControl.ItemsPanel>
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Line X1="330" Y1="80" X2="{Binding CenterX}" Y2="{Binding CenterY}"
+                                              Stroke="#647D9C" StrokeThickness="1.5" StrokeDashArray="4,4"/>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                            <Canvas IsHitTestVisible="False">
+                                <Border Canvas.Left="225" Canvas.Top="35" Width="210" Background="#172B46" Padding="12" CornerRadius="8">
+                                    <TextBlock Text="{Binding NetworkLabel}" TextAlignment="Center" FontWeight="SemiBold"/>
+                                </Border>
+                            </Canvas>
+                            <ListBox ItemsSource="{Binding Nodes}" SelectedItem="{Binding SelectedNode, Mode=TwoWay}"
+                                     Background="Transparent" BorderThickness="0" Padding="0"
+                                     ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.VerticalScrollBarVisibility="Disabled"
+                                     AutomationProperties.Name="Dispositivos no mapa lógico">
+                                <ListBox.ItemsPanel><ItemsPanelTemplate><Canvas/></ItemsPanelTemplate></ListBox.ItemsPanel>
+                                <ListBox.ItemContainerStyle>
+                                    <Style TargetType="ListBoxItem">
+                                        <Setter Property="Canvas.Left" Value="{Binding X}"/>
+                                        <Setter Property="Canvas.Top" Value="{Binding Y}"/>
+                                        <Setter Property="Padding" Value="0"/>
+                                        <Setter Property="AutomationProperties.Name" Value="{Binding AccessibleName}"/>
+                                        <Setter Property="Template">
+                                            <Setter.Value>
+                                                <ControlTemplate TargetType="ListBoxItem">
+                                                    <Border x:Name="Card" Width="190" MinHeight="110" Padding="10" CornerRadius="8"
+                                                            Background="#15253A" BorderBrush="{Binding Accent}" BorderThickness="1">
+                                                        <ContentPresenter/>
+                                                    </Border>
+                                                    <ControlTemplate.Triggers>
+                                                        <Trigger Property="IsSelected" Value="True"><Setter TargetName="Card" Property="BorderThickness" Value="3"/></Trigger>
+                                                        <Trigger Property="IsKeyboardFocusWithin" Value="True"><Setter TargetName="Card" Property="Background" Value="#284265"/></Trigger>
+                                                    </ControlTemplate.Triggers>
+                                                </ControlTemplate>
+                                            </Setter.Value>
+                                        </Setter>
+                                    </Style>
+                                </ListBox.ItemContainerStyle>
+                                <ListBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <StackPanel>
+                                            <TextBlock Text="{Binding Title}" FontWeight="SemiBold" MaxHeight="38" TextTrimming="CharacterEllipsis"/>
+                                            <TextBlock Text="{Binding Device.IpAddress}" Margin="0,6,0,4" Foreground="{Binding Accent}"/>
+                                            <TextBlock Text="{Binding ReachabilityText}" FontSize="11"/>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </ListBox.ItemTemplate>
+                            </ListBox>
+                        </Grid>
+                    </ScrollViewer>
+                </Border>
+                <Border Grid.Column="2" Background="#111E30" Padding="14" CornerRadius="8">
+                    <StackPanel>
+                        <TextBlock Text="Detalhes da observação" FontSize="16" FontWeight="SemiBold"/>
+                        <TextBlock Text="Selecione um dispositivo no mapa ou na lista." Foreground="#94A3B8" Margin="0,6,0,0"/>
+                        <TextBlock Text="{Binding SelectedNode.Title}" Margin="0,12,0,0" FontWeight="SemiBold"/>
+                        <TextBlock Text="IP" Style="{StaticResource Caption}"/><TextBlock Text="{Binding SelectedNode.Device.IpAddress}"/>
+                        <Button Content="Copiar IP" Command="{Binding CopyIpCommand}" Margin="0,6,0,0"/>
+                        <TextBlock Text="Nome DNS" Style="{StaticResource Caption}"/><TextBlock Text="{Binding SelectedNode.NameText}"/>
+                        <TextBlock Text="MAC" Style="{StaticResource Caption}"/><TextBlock Text="{Binding SelectedNode.MacText}"/>
+                        <TextBlock Text="Fabricante (indício OUI)" Style="{StaticResource Caption}"/><TextBlock Text="{Binding SelectedNode.Device.Manufacturer}"/>
+                        <TextBlock Text="Tipo observado" Style="{StaticResource Caption}"/><TextBlock Text="{Binding SelectedNode.Device.DeviceType}"/>
+                        <TextBlock Text="ICMP / latência" Style="{StaticResource Caption}"/>
+                        <TextBlock Text="{Binding SelectedNode.ReachabilityText}"/><TextBlock Text="{Binding SelectedNode.LatencyText}"/>
+                        <TextBlock Text="Evidência" Style="{StaticResource Caption}"/><TextBlock Text="{Binding SelectedNode.Device.Evidence}"/>
+                        <TextBlock Text="Observado em" Style="{StaticResource Caption}"/>
+                        <TextBlock Text="{Binding SelectedNode.Device.DiscoveredAt, StringFormat={}{0:dd/MM/yyyy HH:mm:ss zzz}}"/>
+                    </StackPanel>
+                </Border>
+            </Grid>
+            <TextBlock Text="Lista acessível de observações" FontSize="16" FontWeight="SemiBold" Margin="0,16,0,8"/>
+            <ListBox ItemsSource="{Binding Nodes}" SelectedItem="{Binding SelectedNode, Mode=TwoWay}"
+                     Background="#111E30" Foreground="#E2E8F0" MaxHeight="240"
+                     ScrollViewer.HorizontalScrollBarVisibility="Disabled" AutomationProperties.Name="Lista equivalente ao mapa">
+                <ListBox.ItemContainerStyle>
+                    <Style TargetType="ListBoxItem">
+                        <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                        <Setter Property="AutomationProperties.Name" Value="{Binding AccessibleName}"/>
+                    </Style>
+                </ListBox.ItemContainerStyle>
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <StackPanel Margin="4,6">
+                            <TextBlock Text="{Binding AccessibleName}"/>
+                            <TextBlock Foreground="#94A3B8">
+                                <Run Text="MAC: "/><Run Text="{Binding MacText, Mode=OneWay}"/><Run Text=" · DNS: "/><Run Text="{Binding NameText, Mode=OneWay}"/>
+                                <Run Text=" · OUI: "/><Run Text="{Binding Device.Manufacturer, Mode=OneWay}"/><Run Text=" · Latência: "/><Run Text="{Binding LatencyText, Mode=OneWay}"/>
+                            </TextBlock>
+                        </StackPanel>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

@@ -1,5 +1,5 @@
 #define MyAppName "TechHub"
-#define MyAppVersion "1.0.0"
+#define MyAppVersion "1.1.0"
 #define MyAppPublisher "TechHub"
 #define MyAppExeName "TechHub.App.exe"
 
@@ -19,11 +19,15 @@ PrivilegesRequired=admin
 UninstallDisplayIcon={app}\{#MyAppExeName}
 
 [Files]
-Source: "{#SourceDir}\*"; DestDir: "{app}"; Flags: recursesubdirs ignoreversion
+Source: "{#SourceDir}\*"; DestDir: "{app}"; Excludes: "portable.flag,Data\*,*.pdb"; Flags: recursesubdirs ignoreversion
 
 [Icons]
 Name: "{autoprograms}\TechHub"; Filename: "{app}\{#MyAppExeName}"
 Name: "{autodesktop}\TechHub"; Filename: "{app}\{#MyAppExeName}"
+
+[InstallDelete]
+; A instalação usa LocalAppData. Não remover a pasta Data de uma versão antiga.
+Type: files; Name: "{app}\portable.flag"
 
 [Run]
 Filename: "{app}\{#MyAppExeName}"; Description: "Abrir TechHub"; Flags: nowait postinstall skipifsilent

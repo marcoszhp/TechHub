@@ -1,14 +1,15 @@
 param(
     [ValidateSet('Debug', 'Release')]
     [string]$Configuration = 'Release',
-    [string]$OutputPath = 'artifacts\portable',
+    [string]$OutputPath = 'artifacts\release-1.1.0\portable',
+    [string]$DotnetPath = 'dotnet',
     [switch]$SkipRestore,
     [switch]$Installer
 )
 
 $ErrorActionPreference = 'Stop'
 $projectRoot = $PSScriptRoot
-$dotnetCommand = Get-Command dotnet -ErrorAction SilentlyContinue
+$dotnetCommand = Get-Command $DotnetPath -ErrorAction SilentlyContinue
 if ($null -eq $dotnetCommand) {
     throw 'O SDK do .NET 8 não foi encontrado no PATH.'
 }
@@ -19,6 +20,10 @@ $publishDirectory = Join-Path $projectRoot $OutputPath
 $artifactRoot = Split-Path -Parent $publishDirectory
 $cliDirectory = Join-Path $artifactRoot 'cli'
 $agentDirectory = Join-Path $artifactRoot 'agent'
+
+if (Test-Path -LiteralPath (Join-Path $publishDirectory 'Data')) {
+    throw 'O diretório de publicação contém dados de execução. Use um destino novo para não distribuí-los.'
+}
 
 New-Item -ItemType Directory -Force -Path $publishDirectory, $cliDirectory, $agentDirectory | Out-Null
 

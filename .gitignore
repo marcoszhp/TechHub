@@ -7,3 +7,5 @@ publish/
 Data/
 *.user
 *.suo
+.wrangler/
+node_modules/

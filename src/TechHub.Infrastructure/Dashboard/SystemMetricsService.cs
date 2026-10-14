@@ -18,11 +18,13 @@ public sealed class SystemMetricsService(IPrivilegeService privilegeService) : I
         var systemDrive = new DriveInfo(Path.GetPathRoot(Environment.SystemDirectory) ?? "C:\\");
         var diskUsage = systemDrive.TotalSize == 0 ? 0 : (1d - (double)systemDrive.AvailableFreeSpace / systemDrive.TotalSize) * 100d;
         var alerts = new List<string>();
+        if (cpu is null) alerts.Add("CPU: medição indisponível nesta consulta.");
+        if (memory.UsagePercent is null) alerts.Add("Memória: medição indisponível nesta consulta.");
         if (cpu >= 90) alerts.Add("Uso de CPU muito alto");
         if (memory.UsagePercent >= 90) alerts.Add("Memória disponível baixa");
         if (diskUsage >= 90) alerts.Add("Pouco espaço livre no disco do sistema");
 
-        var score = Math.Clamp(100 - alerts.Count * 15 - (diskUsage >= 80 ? 10 : 0), 0, 100);
+        int? score = cpu is null || memory.UsagePercent is null ? null : Math.Clamp(100 - alerts.Count * 15 - (diskUsage >= 80 ? 10 : 0), 0, 100);
         return new DashboardSnapshot(
             score,
             cpu,
@@ -36,38 +38,41 @@ public sealed class SystemMetricsService(IPrivilegeService privilegeService) : I
             alerts);
     }
 
-    private static double ReadAverageWmiPercentage(string query, string property)
+    private static double? ReadAverageWmiPercentage(string query, string property)
     {
         try
         {
             using var searcher = new ManagementObjectSearcher(query);
+            searcher.Options.Timeout = TimeSpan.FromSeconds(8);
             var values = searcher.Get().Cast<ManagementObject>()
-                .Select(item => Convert.ToDouble(item[property] ?? 0, System.Globalization.CultureInfo.InvariantCulture))
+                .Where(item => item[property] is not null)
+                .Select(item => Convert.ToDouble(item[property], System.Globalization.CultureInfo.InvariantCulture))
                 .ToArray();
-            return values.Length == 0 ? 0 : Math.Round(values.Average(), 1);
+            return values.Length == 0 ? null : Math.Round(values.Average(), 1);
         }
         catch
         {
-            return 0;
+            return null;
         }
     }
 
-    private static (double UsagePercent, long TotalBytes) ReadMemory()
+    private static (double? UsagePercent, long TotalBytes) ReadMemory()
     {
         try
         {
             using var searcher = new ManagementObjectSearcher(
                 "SELECT TotalVisibleMemorySize, FreePhysicalMemory FROM Win32_OperatingSystem");
+            searcher.Options.Timeout = TimeSpan.FromSeconds(8);
             var item = searcher.Get().Cast<ManagementObject>().FirstOrDefault();
             var totalKb = Convert.ToInt64(item?["TotalVisibleMemorySize"] ?? 0);
             var freeKb = Convert.ToInt64(item?["FreePhysicalMemory"] ?? 0);
             var totalBytes = totalKb * 1024L;
-            var usage = totalKb == 0 ? 0 : (1d - (double)freeKb / totalKb) * 100d;
-            return (Math.Round(usage, 1), totalBytes);
+            double? usage = totalKb == 0 ? null : Math.Round((1d - (double)freeKb / totalKb) * 100d, 1);
+            return (usage, totalBytes);
         }
         catch
         {
-            return (0, 0);
+            return (null, 0);
         }
     }
 }

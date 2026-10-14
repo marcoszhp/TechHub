@@ -1,4 +1,5 @@
 using System.Windows;
+using System.Windows.Controls;
 using TechHub.App.ViewModels;
 using Wpf.Ui.Controls;
 
@@ -10,5 +11,12 @@ public partial class MainWindow : FluentWindow
     {
         InitializeComponent();
         DataContext = viewModel;
+    }
+
+    private async void OnNavigationChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (!ReferenceEquals(e.Source, Navigation) || DataContext is not MainViewModel model ||
+            Navigation.SelectedItem is not TabItem tab) return;
+        await model.LoadModuleAsync(tab.Uid);
     }
 }

@@ -8,6 +8,29 @@ namespace TechHub.Tests;
 public sealed class Phase2ServiceTests
 {
     [Fact]
+    public async Task SecurityService_MissingMeasurementsRemainUnknown()
+    {
+        var service = new WindowsSecurityService(new StubPowerShellExecutor("{}"), NullLogger<WindowsSecurityService>.Instance);
+        var snapshot = await service.GetSnapshotAsync();
+        Assert.Null(snapshot.DefenderEnabled);
+        Assert.Null(snapshot.FirewallEnabled);
+        Assert.Null(snapshot.SecureBootEnabled);
+        Assert.False(snapshot.IsHealthy);
+        Assert.Contains(snapshot.Warnings, warning => warning.Contains("não verificados"));
+        Assert.DoesNotContain(snapshot.Warnings, warning => warning.Contains("desativados"));
+    }
+
+    [Fact]
+    public async Task SecurityService_InvalidPayloadDoesNotReportDisabledControls()
+    {
+        var service = new WindowsSecurityService(new StubPowerShellExecutor("not-json"), NullLogger<WindowsSecurityService>.Instance);
+        var snapshot = await service.GetSnapshotAsync();
+        Assert.Null(snapshot.DefenderEnabled);
+        Assert.Null(snapshot.BitLockerEnabled);
+        Assert.NotNull(snapshot.Error);
+    }
+
+    [Fact]
     public async Task SecurityService_ConvertsWindowsPayloadIntoWarnings()
     {
         var executor = new StubPowerShellExecutor("""
