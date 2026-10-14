@@ -28,7 +28,8 @@ Verificado em 14/10/2026. Implementação incremental das etapas A/B/C do prompt
 - Nenhum SFC, DISM, backup/instalação de driver ou varredura de rede foi executado para testar.
 - Publicação autocontida win-x64 e dois instaladores Inno Setup compilados. Executável local identificado como 1.2.1.0. ZIP e hashes gerados em `artifacts/release-1.2.1/github-assets`.
 - A primeira tentativa foi bloqueada pelo aplicativo aberto. Após confirmação do usuário de que salvou/fechou, foi encerrado o processo antigo residual sem janela. Instalador por usuário concluído (saída0), banco/configurações preservados por comparação de hashes e backup privado em `artifacts/local-user-backup-before-1.2.1/Data`.
-- Aplicação instalada1.2.1.0 aberta pelo caminho do usuário; janela respondendo e log de inicialização confirmados. Atalho “TechHub (Usuário)” conferido. Instalação antiga de máquina não removida. Publicação remota deste lote ainda pendente.
+- Aplicação instalada1.2.1.0 aberta pelo caminho do usuário; janela respondendo e log de inicialização confirmados. Atalho “TechHub (Usuário)” conferido. Instalação antiga de máquina não removida.
+- Release pública v1.2.1 confirmada como latest no GitHub; quatro assets com digest/tamanho conferidos. Quatro downloads R2 verificados integralmente por SHA256; site canônico atualizado e validado em `https://techhub-downloads.pages.dev/`. Publicação deste lote concluída, sem concluir as demais etapas do roteiro.
 
 ## Limites e próximos passos
 

@@ -5,13 +5,13 @@ Atualizado em: 2026-10-14
 ## Estado atual — lote de estabilidade 1.2.1 (14/10/2026)
 
 - Pedido vigente: executar `docs/PROMPT-MESTRE-EVOLUCAO-TECHHUB.md` por etapas, iniciando crashes de Diagnósticos/Drivers e tema exclusivamente escuro.
-- Fonte e instaladores estão na versão 1.2.1; versão publicada antes deste lote: 1.2.0. Não confundir build local com publicação.
+- Fonte, instaladores, release pública e site estão na versão1.2.1. Publicação confirmada após autorização explícita do usuário para exceção à margem de uso.
 - Reproduzida exceção WPF em `DriverInfo.HasProblem` com checkbox/binding padrão; corrigido para OneWay. Causa exata do crash originalmente relatado em Diagnósticos não confirmada por logs; mitigadas consultas presas, cancelamento bloqueante e cache de falhas.
 - Consultas: timeout30s, cancelamento não bloqueante, retry, resultados tardios descartados, dados anteriores preservados, limite2 backends pendentes por módulo e exclusão entre consultas/ações. Sem mudanças em segurança de instalação de drivers nem contratos Core.
 - Tema: recursos semânticos, controles/tabelas/combos/GroupBox escuros, estados de botões, bindings readonly, versão do assembly e título não interativo. Erro global inesperado agora encerra com aviso, em vez de continuar indiscriminadamente.
 - Validação: restore sem warnings; 108 testes existentes +33 novos =141 aprovados. Inclui duas consultas reais de leitura no Windows, sem reparos nem alterações de drivers. Cinco testes de render/binding repetidos após checar limites de botões também passaram.
 - Evidências/limitações: `docs/ESTABILIDADE-1.2.1.md`; TRX em `artifacts/test-results`; imagens sintéticas do XAML real em `artifacts/ui-validation-final` (não são captura manual do app instalado).
-- Publicação autocontida win-x64 compilada em `artifacts/release-1.2.1/portable`; dois instaladores, ZIP e SHA256SUMS concluídos sob `artifacts/release-1.2.1/github-assets`. Executável1.2.1.0. Não publicado no GitHub/R2/Pages; site permanece1.2.0.
+- Publicação autocontida win-x64 em `artifacts/release-1.2.1/portable`; dois instaladores, ZIP e SHA256SUMS em `artifacts/release-1.2.1/github-assets`. Executável1.2.1.0. Quatro arquivos publicados no GitHub e R2; site atualizado para1.2.1.
 - Instalações encontradas: usuário1.1.0 e máquina1.1.0. Inspeção restrita não retornava processos; fora da restrição confirmou PID32676 em `C:\Program Files\TechHub\TechHub.App.exe`, respondendo. Este é o app antigo aberto. Não removidas instalações/dados.
 - Instalação por usuário1.2.1 concluída após usuário confirmar trabalho salvo/janela fechada. Restava PID32676 da1.1.0 sem janela (handle0); encerrado especificamente após verificar caminho/identidade. Investigar encerramento residual como pendência, sem afirmar que esta versão já o corrige.
 - Backup privado feito em `artifacts/local-user-backup-before-1.2.1/Data`; instalador validado por SHA256, saída0, sem reinício. Banco e arquivos de configuração comparados por hash antes/depois: preservados. Nunca incluir backup local na publicação.
@@ -20,8 +20,11 @@ Atualizado em: 2026-10-14
 - Duas delegações Sol/medium para XAML e consultas concluídas/revisadas; nenhuma delegação ativa. Houve interrupção por quota e retomada após reset natural, sem comprar créditos/resgatar resets. Conferir limite antes da próxima etapa pesada.
 - Limite na conclusão desta instalação: primário94% usado, semanal96% usado (4% restante). Margem preventiva do usuário atingida: próxima etapa pesada/publicação adiada; continuidade salva, sem créditos/resets utilizados.
 - Domínio canônico de produção: `https://techhub-downloads.pages.dev/`. URLs com hash são snapshots de deploy, não o endereço estável. R2 já habilitado no histórico posterior; notas antigas abaixo não refletem o estado atual.
-- Publicação1.2.1 explicitamente solicitada novamente pelo usuário: GitHub + download no site. Na checagem, primário98% usado (2% restante) e semanal97% usado (3% restante); ambos abaixo da margem5%. Nenhuma operação remota iniciada neste pedido; falta esclarecer exceção à margem ou aguardar renovação.
-- Retomada da publicação: conferir hashes dos quatro arquivos em `artifacts/release-1.2.1/github-assets`, adaptar `scripts/Publish-Release.ps1` (ainda fixa assets/notas1.1.0, não executar sem corrigir), registrar fonte1.2.1 em commit, enviar GitHub, criar/revisar release e assets; enviar R2 `techhub-downloads/releases/1.2.1/`, atualizar `downloads/index.html` e implantar Pages no domínio canônico. Verificar downloads/hashes antes de declarar publicação. NÃO enviar backup privado/Data/logs.
+- Exceção à margem5% autorizada pelo usuário com “autorizo”, especificamente para concluir esta publicação. Sem compra de créditos/resgate de resets; a regra preventiva permanece para etapas futuras.
+- Publicação concluída: fonte commit `d876509` enviado a main; release ID413195535/tagv1.2.1 pública e confirmada como latest. Link: `https://github.com/marcoszhp/TechHub/releases/tag/v1.2.1`.
+- R2: quatro objetos em `techhub-downloads/releases/1.2.1/`; todos baixados integralmente em fluxo e comparados por SHA256 com os arquivos locais. Digests/tamanhos dos quatro assets GitHub também validados antes da publicação.
+- Pages: deploy `https://e4e32795.techhub-downloads.pages.dev`; domínio canônico `https://techhub-downloads.pages.dev/` conferido HTTP200, versão1.2.1 e quatro links atualizados. Backup privado, Data e logs não enviados.
+- Script de release agora usa versão parametrizada, quatro assets, hashes locais/remotos e ReleaseId opcional. A lista de releases teve encapsulamento de array corrigido; rascunho existente foi retomado pelo ID, sem duplicação.
 
 ## Histórico anterior (não usar como estado atual)
 

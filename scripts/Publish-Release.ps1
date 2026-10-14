@@ -1,6 +1,7 @@
 param(
     [Parameter(Mandatory)][string]$AssetDirectory,
     [ValidatePattern('^v\d+\.\d+\.\d+$')][string]$Tag = 'v1.2.1',
+    [long]$ReleaseId = 0,
     [switch]$Publish
 )
 $ErrorActionPreference = 'Stop'
@@ -25,13 +26,22 @@ try {
         if ($parts.Count -eq 2) { $credentialMap[$parts[0]] = $parts[1] }
     }
     $headers = @{ Authorization="Bearer $($credentialMap['password'])"; Accept='application/vnd.github+json'; 'User-Agent'='TechHub-release' }
-    $releases = @(Invoke-RestMethod -Uri "$api/releases" -Headers $headers)
-    $release = $releases | Where-Object tag_name -eq $Tag | Select-Object -First 1
+    if ($ReleaseId -gt 0) {
+        $release = Invoke-RestMethod -Uri "$api/releases/$ReleaseId" -Headers $headers
+        if ($release.tag_name -ne $Tag) { throw 'Release ID e tag divergentes.' }
+    } else {
+        $releases = Invoke-RestMethod -Uri "$api/releases" -Headers $headers
+        $release = $releases | Where-Object tag_name -eq $Tag | Select-Object -First 1
+    }
     if ($Publish) {
         if ($null -eq $release -or $release.draft -ne $true) { throw 'É necessário um rascunho existente para publicar.' }
         $names = @($release.assets | ForEach-Object name)
         foreach ($expected in $assetNames) {
             if ($expected -notin $names) { throw "Pacote ausente: $expected" }
+            $remoteAsset = $release.assets | Where-Object name -eq $expected
+            $localAsset = Join-Path $AssetDirectory $expected
+            $localHash = (Get-FileHash -LiteralPath $localAsset -Algorithm SHA256).Hash.ToLowerInvariant()
+            if ($remoteAsset.size -ne (Get-Item -LiteralPath $localAsset).Length -or $remoteAsset.digest -ne "sha256:$localHash") { throw "Integridade remota divergente: $expected" }
         }
         $release = Invoke-RestMethod -Uri "$api/releases/$($release.id)" -Headers $headers -Method Patch -ContentType 'application/json' -Body '{"draft":false}'
         Write-Output $release.html_url
