@@ -18,18 +18,27 @@ public partial class MainWindow : FluentWindow
     {
         if (!ReferenceEquals(e.Source, Navigation) || DataContext is not MainViewModel model ||
             Navigation.SelectedItem is not TabItem tab) return;
-        await model.LoadModuleAsync(tab.Uid);
+        try { await model.LoadModuleAsync(tab.Uid); }
+        catch (Exception exception) { Serilog.Log.Error(exception, "Falha ao trocar para o módulo {Module}", tab.Uid); }
     }
 
     private void OnLightThemeClick(object sender, RoutedEventArgs e)
     {
-        ApplicationThemeManager.Apply(ApplicationTheme.Light, WindowBackdropType.Mica, true);
-        Background = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(243, 246, 250));
+        try
+        {
+            ApplicationThemeManager.Apply(ApplicationTheme.Light, WindowBackdropType.Mica, true);
+            Background = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(243, 246, 250));
+        }
+        catch (Exception exception) { Serilog.Log.Error(exception, "Falha ao aplicar tema claro"); }
     }
 
     private void OnDarkThemeClick(object sender, RoutedEventArgs e)
     {
-        ApplicationThemeManager.Apply(ApplicationTheme.Dark, WindowBackdropType.Mica, true);
-        Background = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(15, 23, 42));
+        try
+        {
+            ApplicationThemeManager.Apply(ApplicationTheme.Dark, WindowBackdropType.Mica, true);
+            Background = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(15, 23, 42));
+        }
+        catch (Exception exception) { Serilog.Log.Error(exception, "Falha ao aplicar tema escuro"); }
     }
 }

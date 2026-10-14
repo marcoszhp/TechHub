@@ -1,5 +1,6 @@
 using System.IO;
 using System.Windows;
+using System.Windows.Threading;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Serilog;
@@ -13,6 +14,25 @@ namespace TechHub.App;
 public partial class App : Application
 {
     private IHost? _host;
+
+    public App()
+    {
+        DispatcherUnhandledException += OnDispatcherUnhandledException;
+        TaskScheduler.UnobservedTaskException += OnUnobservedTaskException;
+    }
+
+    private void OnDispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
+    {
+        Log.Error(e.Exception, "Falha não tratada na interface");
+        e.Handled = true;
+        MessageBox.Show("O TechHub encontrou uma falha nesta operação e continuou aberto.\n\nConsulte o log em %LocalAppData%\\TechHub\\Data\\Logs.", "TechHub — operação interrompida", MessageBoxButton.OK, MessageBoxImage.Warning);
+    }
+
+    private void OnUnobservedTaskException(object? sender, UnobservedTaskExceptionEventArgs e)
+    {
+        Log.Error(e.Exception, "Falha assíncrona não observada");
+        e.SetObserved();
+    }
 
     protected override async void OnStartup(StartupEventArgs e)
     {
