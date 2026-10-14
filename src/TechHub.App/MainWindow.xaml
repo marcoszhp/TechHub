@@ -9,8 +9,8 @@
                  MinWidth="1080"
                  MinHeight="700"
                  FontFamily="Segoe UI"
-                 Foreground="#E6EDF5"
-                 Background="#0F172A"
+                 Foreground="{StaticResource HubInk}"
+                 Background="{StaticResource HubBackground}"
                  ExtendsContentIntoTitleBar="True"
                  WindowStartupLocation="CenterScreen">
     <Grid>
@@ -21,43 +21,43 @@
         </Grid.RowDefinitions>
 
         <ui:TitleBar Grid.Row="0" Title="TechHub — Manutenção e Suporte" />
-        <TextBlock Grid.Row="0" Text="☾ Tema escuro" HorizontalAlignment="Right" Margin="0,4,112,0" VerticalAlignment="Center" Foreground="#A7B6C8" FontSize="12" />
+        <TextBlock Grid.Row="0" Text="☾ Tema escuro" IsHitTestVisible="False" HorizontalAlignment="Right" Margin="0,4,112,0" VerticalAlignment="Center" Foreground="{StaticResource HubMuted}" FontSize="12" />
 
         <TabControl x:Name="Navigation" Grid.Row="1" Style="{StaticResource HubNavigation}" SelectionChanged="OnNavigationChanged">
             <TabItem Header="Dashboard" Uid="dashboard" Tag="&#xE80F;">
                 <ScrollViewer VerticalScrollBarVisibility="Auto">
                     <StackPanel Margin="24,8,8,8">
-                        <DockPanel Margin="0,0,0,18">
-                            <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
-                                <Button Margin="0,4,8,4" Command="{Binding Dashboard.CheckUpdatesCommand}" Content="Verificar atualização" />
+                        <StackPanel Margin="0,0,0,18">
+                            <WrapPanel HorizontalAlignment="Right">
+                                <Button Margin="0,4,8,4" Command="{Binding Dashboard.CheckUpdatesCommand}" Content="Verificar atualização do TechHub" Style="{StaticResource HubSecondaryButton}" />
                                 <Button Margin="0,4,0,4" Command="{Binding Dashboard.InstallUpdateCommand}" Content="Instalar nova versão" IsEnabled="{Binding Dashboard.UpdateAvailable}" />
-                                <Button Margin="8,4,0,4" Command="{Binding Dashboard.RefreshCommand}" Content="Atualizar" />
-                            </StackPanel>
+                                <Button Margin="8,4,0,4" Command="{Binding Dashboard.RefreshCommand}" Content="Atualizar dados" Style="{StaticResource HubSecondaryButton}" />
+                            </WrapPanel>
                             <StackPanel>
                                 <TextBlock FontSize="22" FontWeight="SemiBold" Text="Saúde do computador" />
-                                <TextBlock Foreground="#A7B6C8" Text="Métricas locais, sem telemetria automática." />
+                                <TextBlock Foreground="{StaticResource HubMuted}" Text="Métricas locais, sem telemetria automática." />
                             </StackPanel>
-                        </DockPanel>
+                        </StackPanel>
                         <UniformGrid Columns="4" Margin="0,0,0,16">
-                            <Border Margin="0,0,10,0" Padding="16" Background="#172E4D" CornerRadius="10">
+                            <Border Margin="0,0,10,0" Padding="16" Background="{StaticResource HubInfoSurface}" CornerRadius="10">
                                 <StackPanel>
                                     <TextBlock Text="Índice de recursos¹" />
                                     <TextBlock FontSize="30" FontWeight="Bold" Text="{Binding Dashboard.HealthScore, TargetNullValue=—}" />
                                 </StackPanel>
                             </Border>
-                            <Border Margin="0,0,10,0" Padding="16" Background="#292345" CornerRadius="10">
+                            <Border Margin="0,0,10,0" Padding="16" Background="{StaticResource HubSecondarySurface}" CornerRadius="10">
                                 <StackPanel>
                                     <TextBlock Text="CPU" />
                                     <TextBlock FontSize="24" Text="{Binding Dashboard.CpuUsagePercent, StringFormat={}{0:0.0}%, TargetNullValue=—}" />
                                 </StackPanel>
                             </Border>
-                            <Border Margin="0,0,10,0" Padding="16" Background="#12372F" CornerRadius="10">
+                            <Border Margin="0,0,10,0" Padding="16" Background="{StaticResource HubSuccessSurface}" CornerRadius="10">
                                 <StackPanel>
                                     <TextBlock Text="Memória" />
                                     <TextBlock FontSize="24" Text="{Binding Dashboard.MemoryUsagePercent, StringFormat={}{0:0.0}%, TargetNullValue=—}" />
                                 </StackPanel>
                             </Border>
-                            <Border Padding="16" Background="#3A2B19" CornerRadius="10">
+                            <Border Padding="16" Background="{StaticResource HubWarningSurface}" CornerRadius="10">
                                 <StackPanel>
                                     <TextBlock Text="Disco do sistema" />
                                     <TextBlock FontSize="24" Text="{Binding Dashboard.DiskUsagePercent, StringFormat={}{0:0.0}%, TargetNullValue=—}" />
@@ -80,9 +80,9 @@
                                 </ItemsControl.ItemTemplate>
                             </ItemsControl>
                         </GroupBox>
-                        <TextBlock Margin="0,12,0,0" Foreground="#A7B6C8" Text="{Binding Dashboard.StatusMessage}" />
-                        <TextBlock Margin="0,6,0,0" Foreground="#60A5FA" Text="{Binding Dashboard.UpdateStatus}" TextWrapping="Wrap" />
-                        <TextBlock Margin="0,12,0,0" FontSize="11" Foreground="#667085" Text="¹ Estimativa baseada em CPU, memória e espaço em disco. Não substitui diagnóstico de hardware ou segurança." TextWrapping="Wrap" />
+                        <TextBlock Margin="0,12,0,0" Foreground="{StaticResource HubMuted}" Text="{Binding Dashboard.StatusMessage}" />
+                        <TextBlock Margin="0,6,0,0" Foreground="{StaticResource HubInfo}" Text="{Binding Dashboard.UpdateStatus}" TextWrapping="Wrap" />
+                        <TextBlock Margin="0,12,0,0" FontSize="11" Foreground="{StaticResource HubMuted}" Text="¹ Estimativa baseada em CPU, memória e espaço em disco. Não substitui diagnóstico de hardware ou segurança." TextWrapping="Wrap" />
                     </StackPanel>
                 </ScrollViewer>
             </TabItem>
@@ -101,19 +101,19 @@
                         <Button Width="120" HorizontalAlignment="Right" Command="{Binding Printers.RefreshCommand}" Content="Atualizar" DockPanel.Dock="Right" />
                         <StackPanel>
                             <TextBlock FontSize="22" FontWeight="SemiBold" Text="Impressoras" />
-                            <TextBlock Foreground="#667085" Text="Inventário local e instalação controlada por IP." />
+                            <TextBlock Foreground="{StaticResource HubMuted}" Text="Inventário local e instalação controlada por IP." />
                         </StackPanel>
                     </DockPanel>
                     <DataGrid Grid.Row="1" AutoGenerateColumns="False" CanUserAddRows="False" IsReadOnly="True" ItemsSource="{Binding Printers.Printers}">
                         <DataGrid.Columns>
-                            <DataGridTextColumn Binding="{Binding Name}" Header="Nome" Width="2*" />
-                            <DataGridTextColumn Binding="{Binding Status}" Header="Status" Width="*" />
-                            <DataGridTextColumn Binding="{Binding DriverName}" Header="Driver" Width="2*" />
-                            <DataGridTextColumn Binding="{Binding PortName}" Header="Porta" Width="*" />
-                            <DataGridCheckBoxColumn Binding="{Binding IsDefault}" Header="Padrão" Width="Auto" />
+                            <DataGridTextColumn Binding="{Binding Name, Mode=OneWay}" Header="Nome" Width="2*" />
+                            <DataGridTextColumn Binding="{Binding Status, Mode=OneWay}" Header="Status" Width="*" />
+                            <DataGridTextColumn Binding="{Binding DriverName, Mode=OneWay}" Header="Driver" Width="2*" />
+                            <DataGridTextColumn Binding="{Binding PortName, Mode=OneWay}" Header="Porta" Width="*" />
+                            <DataGridCheckBoxColumn Binding="{Binding IsDefault, Mode=OneWay}" ElementStyle="{StaticResource HubReadOnlyCheckBox}" Header="Padrão" Width="Auto" />
                         </DataGrid.Columns>
                     </DataGrid>
-                    <Border Grid.Row="2" Margin="0,14,0,0" Padding="14" Background="#F8FAFC" CornerRadius="8">
+                    <Border Grid.Row="2" Margin="0,14,0,0" Padding="14" Background="{StaticResource HubSurface}" CornerRadius="8">
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*" />
@@ -139,20 +139,35 @@
                         <RowDefinition Height="Auto" />
                     </Grid.RowDefinitions>
                     <DockPanel Margin="0,0,0,12">
-                        <Button Width="120" HorizontalAlignment="Right" Command="{Binding Diagnostics.RefreshCommand}" Content="Atualizar" DockPanel.Dock="Right" />
+                        <StackPanel DockPanel.Dock="Right" Margin="12,0,0,0">
+                            <WrapPanel HorizontalAlignment="Right">
+                                <Button Command="{Binding Diagnostics.RefreshCommand}" Content="Atualizar dados" Margin="0,4,8,4" />
+                                <Button Command="{Binding Diagnostics.CancelRefreshCommand}" Content="Cancelar consulta" IsEnabled="{Binding Diagnostics.IsRefreshing, Mode=OneWay}" Style="{StaticResource HubSecondaryButton}" />
+                            </WrapPanel>
+                            <ProgressBar AutomationProperties.Name="Operação em andamento">
+                                <ProgressBar.Style>
+                                    <Style TargetType="ProgressBar" BasedOn="{StaticResource HubBusyProgress}">
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding Diagnostics.IsBusy, Mode=OneWay}" Value="True"><Setter Property="Visibility" Value="Visible" /></DataTrigger>
+                                            <DataTrigger Binding="{Binding Diagnostics.IsRefreshing, Mode=OneWay}" Value="True"><Setter Property="Visibility" Value="Visible" /></DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </ProgressBar.Style>
+                            </ProgressBar>
+                        </StackPanel>
                         <StackPanel>
-                            <TextBlock FontSize="22" FontWeight="SemiBold" Text="Diagnóstico e reparo" />
-                            <TextBlock Foreground="#667085" Text="Coleta local e reparos guiados do Windows." />
+                            <TextBlock FontSize="22" FontWeight="SemiBold" Text="Diagnóstico e reparo" TextWrapping="Wrap" />
+                            <TextBlock Foreground="{StaticResource HubMuted}" Text="Coleta local e reparos guiados do Windows." TextWrapping="Wrap" />
                         </StackPanel>
                     </DockPanel>
                     <UniformGrid Grid.Row="1" Columns="3" Margin="0,0,0,12">
-                        <Border Margin="0,0,10,0" Padding="14" Background="#F8FAFC" CornerRadius="8">
-                            <StackPanel><TextBlock Text="Sistema" /><TextBlock FontWeight="SemiBold" Text="{Binding Diagnostics.OperatingSystem}" /><TextBlock Text="{Binding Diagnostics.OsVersion}" /></StackPanel>
+                        <Border Margin="0,0,10,0" Padding="14" Background="{StaticResource HubSurface}" CornerRadius="8">
+                            <StackPanel><TextBlock Text="Sistema" /><TextBlock FontWeight="SemiBold" Text="{Binding Diagnostics.OperatingSystem}" TextWrapping="Wrap" /><TextBlock Text="{Binding Diagnostics.OsVersion}" TextWrapping="Wrap" /></StackPanel>
                         </Border>
-                        <Border Margin="0,0,10,0" Padding="14" Background="#F8FAFC" CornerRadius="8">
+                        <Border Margin="0,0,10,0" Padding="14" Background="{StaticResource HubSurface}" CornerRadius="8">
                             <StackPanel><TextBlock Text="Tempo ligado" /><TextBlock FontWeight="SemiBold" Text="{Binding Diagnostics.UptimeText}" /></StackPanel>
                         </Border>
-                        <Border Padding="14" Background="#FFF7ED" CornerRadius="8">
+                        <Border Padding="14" Background="{StaticResource HubWarningSurface}" CornerRadius="8">
                             <StackPanel><TextBlock Text="Reparos" /><StackPanel Orientation="Horizontal"><Button Margin="0,6,6,0" Command="{Binding Diagnostics.RepairSfcCommand}" Content="SFC" /><Button Margin="0,6,0,0" Command="{Binding Diagnostics.RepairDismCommand}" Content="DISM" /></StackPanel></StackPanel>
                         </Border>
                     </UniformGrid>
@@ -160,14 +175,14 @@
                         <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
                         <GroupBox Margin="0,0,8,0" Header="Discos">
                             <DataGrid AutoGenerateColumns="False" CanUserAddRows="False" IsReadOnly="True" ItemsSource="{Binding Diagnostics.Disks}">
-                                <DataGrid.Columns><DataGridTextColumn Binding="{Binding Model}" Header="Modelo" Width="2*" /><DataGridTextColumn Binding="{Binding Status}" Header="Status" Width="*" /><DataGridTextColumn Binding="{Binding SizeBytes}" Header="Tamanho" Width="*" /></DataGrid.Columns>
+                                <DataGrid.Columns><DataGridTextColumn Binding="{Binding Model, Mode=OneWay}" Header="Modelo" Width="2*" /><DataGridTextColumn Binding="{Binding Status, Mode=OneWay}" Header="Status" Width="*" /><DataGridTextColumn Binding="{Binding SizeBytes, Mode=OneWay}" Header="Tamanho" Width="*" /></DataGrid.Columns>
                             </DataGrid>
                         </GroupBox>
                         <GroupBox Grid.Column="1" Margin="8,0,0,0" Header="Recomendações">
                             <ItemsControl Margin="12" ItemsSource="{Binding Diagnostics.Recommendations}"><ItemsControl.ItemTemplate><DataTemplate><TextBlock Margin="0,0,0,6" Text="{Binding StringFormat=•  {0}}" TextWrapping="Wrap" /></DataTemplate></ItemsControl.ItemTemplate></ItemsControl>
                         </GroupBox>
                     </Grid>
-                    <TextBlock Grid.Row="3" Margin="0,12,0,0" Foreground="#667085" Text="{Binding Diagnostics.StatusMessage}" />
+                    <TextBlock Grid.Row="3" Margin="0,12,0,0" Foreground="{StaticResource HubMuted}" Text="{Binding Diagnostics.StatusMessage}" TextWrapping="Wrap" AutomationProperties.LiveSetting="Polite" />
                 </Grid>
             </TabItem>
 
@@ -176,19 +191,19 @@
                     <StackPanel>
                         <DockPanel Margin="0,0,0,12">
                             <Button Width="120" HorizontalAlignment="Right" Command="{Binding Security.RefreshCommand}" Content="Atualizar" DockPanel.Dock="Right" />
-                            <StackPanel><TextBlock FontSize="22" FontWeight="SemiBold" Text="Segurança do Windows" /><TextBlock Foreground="#667085" Text="Estado local; o TechHub não envia telemetria." /></StackPanel>
+                            <StackPanel><TextBlock FontSize="22" FontWeight="SemiBold" Text="Segurança do Windows" /><TextBlock Foreground="{StaticResource HubMuted}" Text="Estado local; o TechHub não envia telemetria." /></StackPanel>
                         </DockPanel>
                         <UniformGrid Columns="3" Margin="0,0,0,12">
-                            <Border Margin="0,0,10,10" Padding="14" Background="#F8FAFC" CornerRadius="8"><StackPanel><TextBlock Text="Defender" /><TextBlock FontSize="16" Text="{Binding Security.DefenderEnabled, Converter={StaticResource SecurityStatus}}" /><TextBlock Text="Proteção em tempo real" /><TextBlock Text="{Binding Security.RealTimeProtectionEnabled, Converter={StaticResource SecurityStatus}}" /></StackPanel></Border>
-                            <Border Margin="0,0,10,10" Padding="14" Background="#F8FAFC" CornerRadius="8"><StackPanel><TextBlock Text="Firewall" /><TextBlock FontSize="16" Text="{Binding Security.FirewallEnabled, Converter={StaticResource SecurityStatus}}" /><TextBlock Text="BitLocker" /><TextBlock Text="{Binding Security.BitLockerEnabled, Converter={StaticResource SecurityStatus}}" /></StackPanel></Border>
-                            <Border Padding="14" Background="#F8FAFC" CornerRadius="8"><StackPanel><TextBlock Text="Dispositivo" /><TextBlock Text="TPM" /><TextBlock Text="{Binding Security.TpmPresent, Converter={StaticResource SecurityStatus}}" /><TextBlock Text="Secure Boot" /><TextBlock Text="{Binding Security.SecureBootEnabled, Converter={StaticResource SecurityStatus}}" /></StackPanel></Border>
+                            <Border Margin="0,0,10,10" Padding="14" Background="{StaticResource HubSurface}" CornerRadius="8"><StackPanel><TextBlock Text="Defender" /><TextBlock FontSize="16" Text="{Binding Security.DefenderEnabled, Converter={StaticResource SecurityStatus}}" /><TextBlock Text="Proteção em tempo real" /><TextBlock Text="{Binding Security.RealTimeProtectionEnabled, Converter={StaticResource SecurityStatus}}" /></StackPanel></Border>
+                            <Border Margin="0,0,10,10" Padding="14" Background="{StaticResource HubSurface}" CornerRadius="8"><StackPanel><TextBlock Text="Firewall" /><TextBlock FontSize="16" Text="{Binding Security.FirewallEnabled, Converter={StaticResource SecurityStatus}}" /><TextBlock Text="BitLocker" /><TextBlock Text="{Binding Security.BitLockerEnabled, Converter={StaticResource SecurityStatus}}" /></StackPanel></Border>
+                            <Border Padding="14" Background="{StaticResource HubSurface}" CornerRadius="8"><StackPanel><TextBlock Text="Dispositivo" /><TextBlock Text="TPM" /><TextBlock Text="{Binding Security.TpmPresent, Converter={StaticResource SecurityStatus}}" /><TextBlock Text="Secure Boot" /><TextBlock Text="{Binding Security.SecureBootEnabled, Converter={StaticResource SecurityStatus}}" /></StackPanel></Border>
                         </UniformGrid>
                         <Button Width="210" HorizontalAlignment="Left" Command="{Binding Security.QuickScanCommand}" Content="Solicitar varredura rápida" />
                         <GroupBox Margin="0,16,0,0" Header="Alertas">
                             <ItemsControl Margin="12" ItemsSource="{Binding Security.Warnings}"><ItemsControl.ItemTemplate><DataTemplate><TextBlock Margin="0,0,0,6" Text="{Binding StringFormat=•  {0}}" TextWrapping="Wrap" /></DataTemplate></ItemsControl.ItemTemplate></ItemsControl>
                         </GroupBox>
-                        <StackPanel Margin="0,12,0,0" Orientation="Horizontal"><TextBlock Foreground="#667085" Text="Administradores locais detectados: " /><TextBlock Foreground="#667085" Text="{Binding Security.LocalAdministratorCount}" /></StackPanel>
-                        <TextBlock Margin="0,6,0,0" Foreground="#667085" Text="{Binding Security.StatusMessage}" TextWrapping="Wrap" />
+                        <StackPanel Margin="0,12,0,0" Orientation="Horizontal"><TextBlock Foreground="{StaticResource HubMuted}" Text="Administradores locais detectados: " /><TextBlock Foreground="{StaticResource HubMuted}" Text="{Binding Security.LocalAdministratorCount}" /></StackPanel>
+                        <TextBlock Margin="0,6,0,0" Foreground="{StaticResource HubMuted}" Text="{Binding Security.StatusMessage}" TextWrapping="Wrap" />
                     </StackPanel>
                 </ScrollViewer>
             </TabItem>
@@ -197,13 +212,28 @@
                 <Grid Margin="24,8,8,8">
                     <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="*" /><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /></Grid.RowDefinitions>
                     <DockPanel Margin="0,0,0,12">
-                        <Button Width="120" HorizontalAlignment="Right" Command="{Binding Drivers.RefreshCommand}" Content="Inventariar" DockPanel.Dock="Right" />
-                        <StackPanel><TextBlock FontSize="22" FontWeight="SemiBold" Text="Drivers e dispositivos" /><TextBlock Foreground="#667085" Text="Inventário local; instalação somente de pacote INF local assinado." /></StackPanel>
+                        <StackPanel DockPanel.Dock="Right" Margin="12,0,0,0">
+                            <WrapPanel HorizontalAlignment="Right">
+                                <Button Command="{Binding Drivers.RefreshCommand}" Content="Inventariar" Margin="0,4,8,4" />
+                                <Button Command="{Binding Drivers.CancelRefreshCommand}" Content="Cancelar consulta" IsEnabled="{Binding Drivers.IsRefreshing, Mode=OneWay}" Style="{StaticResource HubSecondaryButton}" />
+                            </WrapPanel>
+                            <ProgressBar AutomationProperties.Name="Operação em andamento">
+                                <ProgressBar.Style>
+                                    <Style TargetType="ProgressBar" BasedOn="{StaticResource HubBusyProgress}">
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding Drivers.IsBusy, Mode=OneWay}" Value="True"><Setter Property="Visibility" Value="Visible" /></DataTrigger>
+                                            <DataTrigger Binding="{Binding Drivers.IsRefreshing, Mode=OneWay}" Value="True"><Setter Property="Visibility" Value="Visible" /></DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </ProgressBar.Style>
+                            </ProgressBar>
+                        </StackPanel>
+                        <StackPanel><TextBlock FontSize="22" FontWeight="SemiBold" Text="Drivers e dispositivos" TextWrapping="Wrap" /><TextBlock Foreground="{StaticResource HubMuted}" Text="Inventário local; instalação somente de pacote INF local assinado." TextWrapping="Wrap" /></StackPanel>
                     </DockPanel>
                     <DataGrid Grid.Row="1" AutoGenerateColumns="False" CanUserAddRows="False" IsReadOnly="True" ItemsSource="{Binding Drivers.Drivers}">
-                        <DataGrid.Columns><DataGridTextColumn Binding="{Binding DeviceName}" Header="Dispositivo" Width="2*" /><DataGridTextColumn Binding="{Binding Manufacturer}" Header="Fabricante" Width="1.3*" /><DataGridTextColumn Binding="{Binding Provider}" Header="Fornecedor" Width="1.3*" /><DataGridTextColumn Binding="{Binding Version}" Header="Versão" Width="*" /><DataGridCheckBoxColumn Binding="{Binding HasProblem}" Header="Problema" Width="Auto" /></DataGrid.Columns>
+                        <DataGrid.Columns><DataGridTextColumn Binding="{Binding DeviceName, Mode=OneWay}" Header="Dispositivo" Width="2*" /><DataGridTextColumn Binding="{Binding Manufacturer, Mode=OneWay}" Header="Fabricante" Width="1.3*" /><DataGridTextColumn Binding="{Binding Provider, Mode=OneWay}" Header="Fornecedor" Width="1.3*" /><DataGridTextColumn Binding="{Binding Version, Mode=OneWay}" Header="Versão" Width="*" /><DataGridCheckBoxColumn Binding="{Binding HasProblem, Mode=OneWay}" ElementStyle="{StaticResource HubReadOnlyCheckBox}" Header="Problema" Width="Auto" /></DataGrid.Columns>
                     </DataGrid>
-                    <Border Grid.Row="2" Margin="0,12,0,0" Padding="12" Background="#F8FAFC" CornerRadius="8">
+                    <Border Grid.Row="2" Margin="0,12,0,0" Padding="12" Background="{StaticResource HubSurface}" CornerRadius="8">
                         <StackPanel>
                             <TextBlock Text="Instalar pacote local assinado (INF)" />
                             <DockPanel><Button DockPanel.Dock="Right" Margin="8,0,0,0" Command="{Binding Drivers.InstallOfflineCommand}" Content="Verificar e instalar" /><TextBox Text="{Binding Drivers.InfPath, UpdateSourceTrigger=PropertyChanged}" AutomationProperties.Name="Caminho do arquivo INF assinado" /></DockPanel>
@@ -214,7 +244,7 @@
                             </Grid>
                         </StackPanel>
                     </Border>
-                    <TextBlock Grid.Row="3" Margin="0,10,0,0" Foreground="#667085" Text="{Binding Drivers.StatusMessage}" TextWrapping="Wrap" />
+                    <TextBlock Grid.Row="3" Margin="0,10,0,0" Foreground="{StaticResource HubMuted}" Text="{Binding Drivers.StatusMessage}" TextWrapping="Wrap" />
                 </Grid>
             </TabItem>
 
@@ -223,11 +253,11 @@
                     <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /><RowDefinition Height="*" /><RowDefinition Height="Auto" /></Grid.RowDefinitions>
                     <DockPanel Margin="0,0,0,12">
                         <Button Width="120" HorizontalAlignment="Right" Command="{Binding Cleaning.AnalyzeCommand}" Content="Gerar prévia" DockPanel.Dock="Right" />
-                        <StackPanel><TextBlock FontSize="22" FontWeight="SemiBold" Text="Limpeza controlada" /><TextBlock Foreground="#667085" Text="A análise não apaga arquivos; a execução exige confirmação e ponto de restauração." /></StackPanel>
+                        <StackPanel><TextBlock FontSize="22" FontWeight="SemiBold" Text="Limpeza controlada" /><TextBlock Foreground="{StaticResource HubMuted}" Text="A análise não apaga arquivos; a execução exige confirmação e ponto de restauração." /></StackPanel>
                     </DockPanel>
                     <Grid Grid.Row="1" Margin="0,0,0,12"><Grid.ColumnDefinitions><ColumnDefinition Width="Auto" /><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions><TextBlock Margin="0,0,8,0" VerticalAlignment="Center" Text="Modo:" /><ComboBox Grid.Column="1" HorizontalAlignment="Left" Width="120" ItemsSource="{Binding Cleaning.Modes}" SelectedItem="{Binding Cleaning.Mode}" /><Button Grid.Column="2" Command="{Binding Cleaning.ExecuteCommand}" Content="Executar prévia" /></Grid>
-                    <Grid Grid.Row="2"><Grid.ColumnDefinitions><ColumnDefinition Width="280" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions><GroupBox Margin="0,0,10,0" Header="Escopos"><ItemsControl Margin="10" ItemsSource="{Binding Cleaning.Scopes}"><ItemsControl.ItemTemplate><DataTemplate><CheckBox Margin="0,0,0,7" Content="{Binding Label}" IsChecked="{Binding IsSelected}" /></DataTemplate></ItemsControl.ItemTemplate></ItemsControl></GroupBox><DataGrid Grid.Column="1" AutoGenerateColumns="False" CanUserAddRows="False" IsReadOnly="True" ItemsSource="{Binding Cleaning.Items}"><DataGrid.Columns><DataGridTextColumn Binding="{Binding Location}" Header="Arquivo" Width="2*" /><DataGridTextColumn Binding="{Binding Bytes}" Header="Bytes" Width="*" /><DataGridTextColumn Binding="{Binding Reason}" Header="Motivo" Width="1.5*" /></DataGrid.Columns></DataGrid></Grid>
-                    <TextBlock Grid.Row="3" Margin="0,10,0,0" Foreground="#667085" Text="{Binding Cleaning.StatusMessage}" TextWrapping="Wrap" />
+                    <Grid Grid.Row="2"><Grid.ColumnDefinitions><ColumnDefinition Width="280" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions><GroupBox Margin="0,0,10,0" Header="Escopos"><ItemsControl Margin="10" ItemsSource="{Binding Cleaning.Scopes}"><ItemsControl.ItemTemplate><DataTemplate><CheckBox Margin="0,0,0,7" Content="{Binding Label}" IsChecked="{Binding IsSelected}" /></DataTemplate></ItemsControl.ItemTemplate></ItemsControl></GroupBox><DataGrid Grid.Column="1" AutoGenerateColumns="False" CanUserAddRows="False" IsReadOnly="True" ItemsSource="{Binding Cleaning.Items}"><DataGrid.Columns><DataGridTextColumn Binding="{Binding Location, Mode=OneWay}" Header="Arquivo" Width="2*" /><DataGridTextColumn Binding="{Binding Bytes, Mode=OneWay}" Header="Bytes" Width="*" /><DataGridTextColumn Binding="{Binding Reason, Mode=OneWay}" Header="Motivo" Width="1.5*" /></DataGrid.Columns></DataGrid></Grid>
+                    <TextBlock Grid.Row="3" Margin="0,10,0,0" Foreground="{StaticResource HubMuted}" Text="{Binding Cleaning.StatusMessage}" TextWrapping="Wrap" />
                 </Grid>
             </TabItem>
 
@@ -235,7 +265,7 @@
             <TabItem Header="Atendimento" Uid="tickets" Tag="&#xE8F2;">
                 <Grid Margin="8">
                     <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /><RowDefinition /><RowDefinition Height="135" /><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /></Grid.RowDefinitions>
-                    <DockPanel Margin="0,0,0,12"><Button DockPanel.Dock="Right" Command="{Binding Tickets.RefreshCommand}" Content="Atualizar" /><StackPanel><TextBlock FontSize="24" FontWeight="SemiBold" Text="Central de atendimento" /><TextBlock Foreground="#667085" Text="Chamados locais, comentários e diagnóstico anexável." /></StackPanel></DockPanel>
+                    <DockPanel Margin="0,0,0,12"><Button DockPanel.Dock="Right" Command="{Binding Tickets.RefreshCommand}" Content="Atualizar" /><StackPanel><TextBlock FontSize="24" FontWeight="SemiBold" Text="Central de atendimento" /><TextBlock Foreground="{StaticResource HubMuted}" Text="Chamados locais, comentários e diagnóstico anexável." /></StackPanel></DockPanel>
                     <Grid Grid.Row="1" Margin="0,0,0,12"><Grid.ColumnDefinitions><ColumnDefinition Width="2*" /><ColumnDefinition Width="3*" /><ColumnDefinition Width="130" /><ColumnDefinition Width="110" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
                         <StackPanel Margin="0,0,8,0"><TextBlock Text="Título" /><TextBox Text="{Binding Tickets.Title, UpdateSourceTrigger=PropertyChanged}" AutomationProperties.Name="Título do chamado" MaxLength="200" /></StackPanel>
                         <StackPanel Grid.Column="1" Margin="0,0,8,0"><TextBlock Text="Descrição" /><TextBox Text="{Binding Tickets.Description, UpdateSourceTrigger=PropertyChanged}" AutomationProperties.Name="Descrição do chamado" MaxLength="4000" /></StackPanel>
@@ -244,14 +274,14 @@
                         <Button Grid.Column="4" VerticalAlignment="Bottom" Margin="0" Command="{Binding Tickets.CreateCommand}" Content="Criar" />
                     </Grid>
                     <DataGrid Grid.Row="2" AutoGenerateColumns="False" CanUserAddRows="False" IsReadOnly="True" ItemsSource="{Binding Tickets.Tickets}" SelectedItem="{Binding Tickets.SelectedTicket}">
-                        <DataGrid.Columns><DataGridTextColumn Binding="{Binding Id}" Header="#" Width="50" /><DataGridTextColumn Binding="{Binding Title}" Header="Título" Width="2*" /><DataGridTextColumn Binding="{Binding Category}" Header="Categoria" Width="*" /><DataGridTextColumn Binding="{Binding Priority}" Header="Prioridade" Width="*" /><DataGridTextColumn Binding="{Binding Status}" Header="Status" Width="*" /></DataGrid.Columns>
+                        <DataGrid.Columns><DataGridTextColumn Binding="{Binding Id, Mode=OneWay}" Header="#" Width="50" /><DataGridTextColumn Binding="{Binding Title, Mode=OneWay}" Header="Título" Width="2*" /><DataGridTextColumn Binding="{Binding Category, Mode=OneWay}" Header="Categoria" Width="*" /><DataGridTextColumn Binding="{Binding Priority, Mode=OneWay}" Header="Prioridade" Width="*" /><DataGridTextColumn Binding="{Binding Status, Mode=OneWay}" Header="Status" Width="*" /></DataGrid.Columns>
                     </DataGrid>
                     <Grid Grid.Row="3" Margin="0,10,0,0"><Grid.ColumnDefinitions><ColumnDefinition /><ColumnDefinition Width="2*" /></Grid.ColumnDefinitions>
                         <ScrollViewer VerticalScrollBarVisibility="Auto" Margin="0,0,12,0"><StackPanel><TextBlock Text="DESCRIÇÃO" FontSize="11" FontWeight="SemiBold" /><TextBlock Text="{Binding Tickets.SelectedTicket.Description, TargetNullValue=Selecione um chamado}" TextWrapping="Wrap" /></StackPanel></ScrollViewer>
-                        <GroupBox Grid.Column="1" Header="Comentários"><ListBox ItemsSource="{Binding Tickets.Comments}" BorderThickness="0" ScrollViewer.HorizontalScrollBarVisibility="Disabled"><ListBox.ItemTemplate><DataTemplate><StackPanel><TextBlock FontSize="11" Foreground="#667085"><Run Text="{Binding Author}" /><Run Text=" · " /><Run Text="{Binding CreatedAt, StringFormat={}{0:dd/MM HH:mm}}" /></TextBlock><TextBlock Text="{Binding Body}" TextWrapping="Wrap" /></StackPanel></DataTemplate></ListBox.ItemTemplate></ListBox></GroupBox>
+                        <GroupBox Grid.Column="1" Header="Comentários"><ListBox ItemsSource="{Binding Tickets.Comments}" BorderThickness="0" ScrollViewer.HorizontalScrollBarVisibility="Disabled"><ListBox.ItemTemplate><DataTemplate><StackPanel><TextBlock FontSize="11" Foreground="{StaticResource HubMuted}"><Run Text="{Binding Author, Mode=OneWay}" /><Run Text=" · " /><Run Text="{Binding CreatedAt, Mode=OneWay, StringFormat={}{0:dd/MM HH:mm}}" /></TextBlock><TextBlock Text="{Binding Body}" TextWrapping="Wrap" /></StackPanel></DataTemplate></ListBox.ItemTemplate></ListBox></GroupBox>
                     </Grid>
                     <DockPanel Grid.Row="4" Margin="0,10,0,0"><Button DockPanel.Dock="Right" Margin="8,0,0,0" Command="{Binding Tickets.SetResolvedCommand}" Content="Resolver" /><Button DockPanel.Dock="Right" Margin="8,0,0,0" Command="{Binding Tickets.CollectDiagnosticsCommand}" Content="Coletar diagnóstico" /><Button DockPanel.Dock="Right" Margin="8,0,0,0" Command="{Binding Tickets.AddCommentCommand}" Content="Comentar" /><TextBox Text="{Binding Tickets.Comment, UpdateSourceTrigger=PropertyChanged}" AutomationProperties.Name="Novo comentário" ToolTip="Escreva um comentário para o chamado selecionado" /></DockPanel>
-                    <TextBlock Grid.Row="5" Margin="0,10,0,0" Text="{Binding Tickets.StatusMessage}" Foreground="#667085" TextWrapping="Wrap" />
+                    <TextBlock Grid.Row="5" Margin="0,10,0,0" Text="{Binding Tickets.StatusMessage}" Foreground="{StaticResource HubMuted}" TextWrapping="Wrap" />
                 </Grid>
             </TabItem>
 
@@ -259,19 +289,19 @@
             <TabItem Header="Relatórios" Uid="reports" Tag="&#xE9F9;">
                 <StackPanel Margin="24,8,8,8">
                     <TextBlock FontSize="22" FontWeight="SemiBold" Text="Relatórios e exportação" />
-                    <TextBlock Margin="0,0,0,16" Foreground="#667085" Text="Exportação local dos chamados em formatos abertos." />
+                    <TextBlock Margin="0,0,0,16" Foreground="{StaticResource HubMuted}" Text="Exportação local dos chamados em formatos abertos." />
                     <Grid Margin="0,0,0,10"><Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions><TextBox Text="{Binding Reports.CsvPath, UpdateSourceTrigger=PropertyChanged}" /><Button Grid.Column="1" Margin="8,0,0,0" Command="{Binding Reports.ExportCsvCommand}" Content="Exportar CSV" /></Grid>
                     <Grid><Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions><TextBox Text="{Binding Reports.JsonPath, UpdateSourceTrigger=PropertyChanged}" /><Button Grid.Column="1" Margin="8,0,0,0" Command="{Binding Reports.ExportJsonCommand}" Content="Exportar JSON" /></Grid>
-                    <TextBlock Margin="0,16,0,0" Foreground="#667085" Text="{Binding Reports.StatusMessage}" TextWrapping="Wrap" />
+                    <TextBlock Margin="0,16,0,0" Foreground="{StaticResource HubMuted}" Text="{Binding Reports.StatusMessage}" TextWrapping="Wrap" />
                 </StackPanel>
             </TabItem>
 
             <TabItem Header="Software" Uid="software" Tag="&#xE71D;">
                 <Grid Margin="24,8,8,8">
                     <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="*" /><RowDefinition Height="Auto" /><RowDefinition Height="*" /></Grid.RowDefinitions>
-                    <StackPanel Margin="0,0,0,12"><TextBlock FontSize="22" FontWeight="SemiBold" Text="Software e atualizações" /><TextBlock Foreground="#667085" Text="Inventário do registro e atualizações via winget, sempre com confirmação." TextWrapping="Wrap" /><WrapPanel><Button Margin="0,8,8,0" Command="{Binding Software.RefreshCommand}" Content="Inventário" /><Button Margin="0,8,8,0" Command="{Binding Software.CheckUpgradesCommand}" Content="Verificar atualizações" /><Button Margin="0,8,0,0" Command="{Binding Software.UpgradeAllCommand}" Content="Atualizar tudo" /></WrapPanel></StackPanel>
-                    <DataGrid Grid.Row="1" AutoGenerateColumns="False" CanUserAddRows="False" IsReadOnly="True" ItemsSource="{Binding Software.Software}"><DataGrid.Columns><DataGridTextColumn Binding="{Binding Name}" Header="Nome" Width="2*" /><DataGridTextColumn Binding="{Binding Version}" Header="Versão" Width="*" /><DataGridTextColumn Binding="{Binding Publisher}" Header="Fabricante" Width="1.5*" /><DataGridTextColumn Binding="{Binding Source}" Header="Origem" Width="1.5*" /></DataGrid.Columns></DataGrid>
-                    <TextBlock Grid.Row="2" Margin="0,12,0,4" Foreground="#667085" Text="{Binding Software.UpgradeMessage}" TextWrapping="Wrap" />
+                    <StackPanel Margin="0,0,0,12"><TextBlock FontSize="22" FontWeight="SemiBold" Text="Software e atualizações" /><TextBlock Foreground="{StaticResource HubMuted}" Text="Inventário do registro e atualizações via winget, sempre com confirmação." TextWrapping="Wrap" /><WrapPanel><Button Margin="0,8,8,0" Command="{Binding Software.RefreshCommand}" Content="Inventário" /><Button Margin="0,8,8,0" Command="{Binding Software.CheckUpgradesCommand}" Content="Verificar atualizações" /><Button Margin="0,8,0,0" Command="{Binding Software.UpgradeAllCommand}" Content="Atualizar tudo" /></WrapPanel></StackPanel>
+                    <DataGrid Grid.Row="1" AutoGenerateColumns="False" CanUserAddRows="False" IsReadOnly="True" ItemsSource="{Binding Software.Software}"><DataGrid.Columns><DataGridTextColumn Binding="{Binding Name, Mode=OneWay}" Header="Nome" Width="2*" /><DataGridTextColumn Binding="{Binding Version, Mode=OneWay}" Header="Versão" Width="*" /><DataGridTextColumn Binding="{Binding Publisher, Mode=OneWay}" Header="Fabricante" Width="1.5*" /><DataGridTextColumn Binding="{Binding Source, Mode=OneWay}" Header="Origem" Width="1.5*" /></DataGrid.Columns></DataGrid>
+                    <TextBlock Grid.Row="2" Margin="0,12,0,4" Foreground="{StaticResource HubMuted}" Text="{Binding Software.UpgradeMessage}" TextWrapping="Wrap" />
                     <ListBox Grid.Row="3" ItemsSource="{Binding Software.UpgradeLines}" />
                 </Grid>
             </TabItem>
@@ -279,9 +309,9 @@
             <TabItem Header="Automação" Uid="automation" Tag="&#xE945;">
                 <Grid Margin="24,8,8,8">
                     <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="*" /><RowDefinition Height="Auto" /></Grid.RowDefinitions>
-                    <DockPanel Margin="0,0,0,12"><Button Width="120" HorizontalAlignment="Right" Command="{Binding Automation.RefreshCommand}" Content="Atualizar" DockPanel.Dock="Right" /><StackPanel><TextBlock FontSize="22" FontWeight="SemiBold" Text="Automação" /><TextBlock Foreground="#667085" Text="Playbooks locais com ações aprovadas e confirmação." /></StackPanel></DockPanel>
-                    <ListBox Grid.Row="1" ItemsSource="{Binding Automation.Playbooks}" SelectedItem="{Binding Automation.SelectedPlaybook}"><ListBox.ItemTemplate><DataTemplate><StackPanel Margin="8"><TextBlock FontWeight="SemiBold" Text="{Binding Name}" /><TextBlock Foreground="#667085" Text="{Binding Description}" TextWrapping="Wrap" /><StackPanel Orientation="Horizontal"><TextBlock Text="Etapas: " /><TextBlock Text="{Binding Steps.Count}" /></StackPanel></StackPanel></DataTemplate></ListBox.ItemTemplate></ListBox>
-                    <DockPanel Grid.Row="2" Margin="0,12,0,0"><Button Width="140" HorizontalAlignment="Left" Command="{Binding Automation.RunCommand}" Content="Executar playbook" DockPanel.Dock="Left" /><TextBlock Margin="12,0,0,0" VerticalAlignment="Center" Foreground="#667085" Text="{Binding Automation.StatusMessage}" TextWrapping="Wrap" /></DockPanel>
+                    <DockPanel Margin="0,0,0,12"><Button Width="120" HorizontalAlignment="Right" Command="{Binding Automation.RefreshCommand}" Content="Atualizar" DockPanel.Dock="Right" /><StackPanel><TextBlock FontSize="22" FontWeight="SemiBold" Text="Automação" /><TextBlock Foreground="{StaticResource HubMuted}" Text="Playbooks locais com ações aprovadas e confirmação." /></StackPanel></DockPanel>
+                    <ListBox Grid.Row="1" ItemsSource="{Binding Automation.Playbooks}" SelectedItem="{Binding Automation.SelectedPlaybook}"><ListBox.ItemTemplate><DataTemplate><StackPanel Margin="8"><TextBlock FontWeight="SemiBold" Text="{Binding Name}" /><TextBlock Foreground="{StaticResource HubMuted}" Text="{Binding Description}" TextWrapping="Wrap" /><StackPanel Orientation="Horizontal"><TextBlock Text="Etapas: " /><TextBlock Text="{Binding Steps.Count}" /></StackPanel></StackPanel></DataTemplate></ListBox.ItemTemplate></ListBox>
+                    <DockPanel Grid.Row="2" Margin="0,12,0,0"><Button Width="140" HorizontalAlignment="Left" Command="{Binding Automation.RunCommand}" Content="Executar playbook" DockPanel.Dock="Left" /><TextBlock Margin="12,0,0,0" VerticalAlignment="Center" Foreground="{StaticResource HubMuted}" Text="{Binding Automation.StatusMessage}" TextWrapping="Wrap" /></DockPanel>
                 </Grid>
             </TabItem>
 
@@ -289,7 +319,7 @@
                 <ScrollViewer Margin="24,8,8,8" VerticalScrollBarVisibility="Auto">
                     <StackPanel>
                         <TextBlock FontSize="22" FontWeight="SemiBold" Text="Assistente de diagnóstico" />
-                        <TextBlock Margin="0,0,0,12" Foreground="#667085" Text="Funciona offline por regras; não envia sintomas para serviços externos." TextWrapping="Wrap" />
+                        <TextBlock Margin="0,0,0,12" Foreground="{StaticResource HubMuted}" Text="Funciona offline por regras; não envia sintomas para serviços externos." TextWrapping="Wrap" />
                         <TextBlock Text="Descreva o sintoma (por exemplo, sem internet)" />
                         <DockPanel Margin="0,0,0,16"><Button Width="100" Margin="8,0,0,0" Command="{Binding Assistant.AskCommand}" Content="Analisar" DockPanel.Dock="Right" /><TextBox Text="{Binding Assistant.Symptom, UpdateSourceTrigger=PropertyChanged}" AutomationProperties.Name="Sintoma para análise offline" /></DockPanel>
                         <TextBlock FontSize="18" FontWeight="SemiBold" Text="{Binding Assistant.Summary}" TextWrapping="Wrap" />
@@ -302,6 +332,6 @@
             <TabItem Header="Backup e restauração" Uid="backup" Tag="&#xE8B7;"><views:WorkspaceView DataContext="{Binding Workspace}" /></TabItem>
             <TabItem Header="Configurações" Uid="settings" Tag="&#xE115;"><views:WorkspaceView DataContext="{Binding Workspace}" /></TabItem>
         </TabControl>
-        <Border Grid.Row="2" Background="#E8EEF5" Padding="18,4"><DockPanel><TextBlock DockPanel.Dock="Right" Foreground="#586D83" FontSize="11" Text="TechHub 1.1 · Ações de sistema exigem confirmação" /><TextBlock FontSize="11" Text="{Binding LoadStatus}" /></DockPanel></Border>
+        <Border Grid.Row="2" Background="{StaticResource HubSidebar}" Padding="18,4"><Grid><Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions><TextBlock Grid.Column="1" Margin="16,3,0,3" Foreground="{StaticResource HubMuted}" FontSize="11" Text="{Binding ApplicationVersionLabel, Mode=OneWay}" /><TextBlock FontSize="11" Text="{Binding LoadStatus}" TextTrimming="CharacterEllipsis" ToolTip="{Binding LoadStatus}" /></Grid></Border>
     </Grid>
 </ui:FluentWindow>

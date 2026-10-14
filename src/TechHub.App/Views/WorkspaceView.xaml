@@ -1,6 +1,7 @@
 <UserControl x:Class="TechHub.App.Views.WorkspaceView"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    Background="{StaticResource HubPanel}" Foreground="{StaticResource HubInk}">
     <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
         <StackPanel Margin="16">
             <DockPanel Margin="0,0,0,8">
@@ -8,15 +9,15 @@
                 <TextBlock Text="{Binding SectionTitle}" FontSize="22" FontWeight="SemiBold" TextWrapping="Wrap"/>
             </DockPanel>
             <TextBlock Text="{Binding StatusMessage}" TextWrapping="Wrap" Margin="0,0,0,6" AutomationProperties.LiveSetting="Polite"/>
-            <TextBlock Text="{Binding ErrorMessage}" Foreground="#E57373" TextWrapping="Wrap" Margin="0,0,0,8" AutomationProperties.LiveSetting="Assertive"/>
+            <TextBlock Text="{Binding ErrorMessage}" Foreground="{StaticResource HubError}" TextWrapping="Wrap" Margin="0,0,0,8" AutomationProperties.LiveSetting="Assertive"/>
             <ProgressBar Height="3" IsIndeterminate="True" Margin="0,0,0,8">
-                <ProgressBar.Style><Style TargetType="ProgressBar"><Setter Property="Visibility" Value="Collapsed"/><Style.Triggers><DataTrigger Binding="{Binding IsBusy}" Value="True"><Setter Property="Visibility" Value="Visible"/></DataTrigger></Style.Triggers></Style></ProgressBar.Style>
+                <ProgressBar.Style><Style TargetType="ProgressBar" BasedOn="{StaticResource HubBusyProgress}"><Setter Property="Visibility" Value="Collapsed"/><Style.Triggers><DataTrigger Binding="{Binding IsBusy}" Value="True"><Setter Property="Visibility" Value="Visible"/></DataTrigger></Style.Triggers></Style></ProgressBar.Style>
             </ProgressBar>
 
             <StackPanel>
                 <StackPanel.Style><Style TargetType="StackPanel"><Setter Property="Visibility" Value="Collapsed"/><Style.Triggers><DataTrigger Binding="{Binding Section}" Value="computer"><Setter Property="Visibility" Value="Visible"/></DataTrigger></Style.Triggers></Style></StackPanel.Style>
                 <TextBlock Text="{Binding ComputerTimestamp}" Margin="0,0,0,8"/>
-                <DataGrid ItemsSource="{Binding ComputerDetails}"  Height="320" AutoGenerateColumns="False" IsReadOnly="True" CanUserAddRows="False" CanUserDeleteRows="False" SelectionMode="Single" SelectionUnit="FullRow" Margin="0,8,0,8" ScrollViewer.VerticalScrollBarVisibility="Auto" ScrollViewer.HorizontalScrollBarVisibility="Auto"><DataGrid.Columns><DataGridTextColumn Header="Informação" Binding="{Binding Label}" Width="190"/><DataGridTextColumn Header="Valor" Binding="{Binding Value}" Width="*"/></DataGrid.Columns></DataGrid>
+                <DataGrid ItemsSource="{Binding ComputerDetails}"  Height="320" AutoGenerateColumns="False" IsReadOnly="True" CanUserAddRows="False" CanUserDeleteRows="False" SelectionMode="Single" SelectionUnit="FullRow" Margin="0,8,0,8" ScrollViewer.VerticalScrollBarVisibility="Auto" ScrollViewer.HorizontalScrollBarVisibility="Auto"><DataGrid.Columns><DataGridTextColumn Header="Informação" Binding="{Binding Label, Mode=OneWay}" Width="190"/><DataGridTextColumn Header="Valor" Binding="{Binding Value, Mode=OneWay}" Width="*"/></DataGrid.Columns></DataGrid>
                 <ItemsControl ItemsSource="{Binding ComputerWarnings}">
                     <ItemsControl.ItemTemplate><DataTemplate><TextBlock Text="{Binding}" TextWrapping="Wrap" Margin="0,4"/></DataTemplate></ItemsControl.ItemTemplate>
                 </ItemsControl>
@@ -37,7 +38,7 @@
                 <TextBlock Text="Consultas fixas e somente leitura. Nenhum comando livre. Limite de 15 segundos e 32 KB de saída." TextWrapping="Wrap" Margin="0,4"/>
                 <Label Content="Consulta" Target="{Binding ElementName=DiagnosticChoice}"/>
                 <ComboBox x:Name="DiagnosticChoice" ItemsSource="{Binding Diagnostics}" DisplayMemberPath="Label" SelectedItem="{Binding SelectedDiagnostic}">
-                    <ComboBox.Style><Style TargetType="ComboBox"><Style.Triggers><DataTrigger Binding="{Binding IsDiagnosticRunning}" Value="True"><Setter Property="IsEnabled" Value="False"/></DataTrigger></Style.Triggers></Style></ComboBox.Style>
+                    <ComboBox.Style><Style TargetType="ComboBox" BasedOn="{StaticResource HubComboBox}"><Style.Triggers><DataTrigger Binding="{Binding IsDiagnosticRunning}" Value="True"><Setter Property="IsEnabled" Value="False"/></DataTrigger></Style.Triggers></Style></ComboBox.Style>
                 </ComboBox>
                 <Label Content="Host ou IP (ping de host); nome DNS (nslookup)" Target="{Binding ElementName=HostInput}"/><TextBox x:Name="HostInput" Text="{Binding DiagnosticHost, UpdateSourceTrigger=PropertyChanged}" MaxLength="253" />
                 <TextBlock Text="IP e gateway usam configuração local; o campo acima é usado apenas para ping de host e DNS." TextWrapping="Wrap" Margin="0,4"/>
@@ -60,7 +61,7 @@
                         <TextBlock Text="Clientes" FontSize="16" FontWeight="SemiBold"/>
                         <Label Content="Buscar nome, contato ou notas" Target="{Binding ElementName=ClientSearchInput}"/><TextBox x:Name="ClientSearchInput" Text="{Binding ClientSearch, UpdateSourceTrigger=PropertyChanged}" MaxLength="4000" />
                         <Button Content="Buscar clientes" Command="{Binding RefreshCommand}" HorizontalAlignment="Left" Margin="0,8,0,0"/>
-                        <DataGrid ItemsSource="{Binding Clients}" SelectedItem="{Binding SelectedClient, Mode=TwoWay}" Height="140" AutoGenerateColumns="False" IsReadOnly="True" CanUserAddRows="False" CanUserDeleteRows="False" SelectionMode="Single" SelectionUnit="FullRow" Margin="0,8,0,8" ScrollViewer.VerticalScrollBarVisibility="Auto" ScrollViewer.HorizontalScrollBarVisibility="Auto"><DataGrid.Columns><DataGridTextColumn Header="Nome" Binding="{Binding Name}" Width="*"/><DataGridTextColumn Header="Contato" Binding="{Binding Contact}" Width="*"/></DataGrid.Columns></DataGrid>
+                        <DataGrid ItemsSource="{Binding Clients}" SelectedItem="{Binding SelectedClient, Mode=TwoWay}" Height="140" AutoGenerateColumns="False" IsReadOnly="True" CanUserAddRows="False" CanUserDeleteRows="False" SelectionMode="Single" SelectionUnit="FullRow" Margin="0,8,0,8" ScrollViewer.VerticalScrollBarVisibility="Auto" ScrollViewer.HorizontalScrollBarVisibility="Auto"><DataGrid.Columns><DataGridTextColumn Header="Nome" Binding="{Binding Name, Mode=OneWay}" Width="*"/><DataGridTextColumn Header="Contato" Binding="{Binding Contact, Mode=OneWay}" Width="*"/></DataGrid.Columns></DataGrid>
                         <Label Content="Nome do cliente" Target="{Binding ElementName=ClientNameInput}"/><TextBox x:Name="ClientNameInput" Text="{Binding ClientName, UpdateSourceTrigger=PropertyChanged}" MaxLength="200" />
                         <Label Content="Contato" Target="{Binding ElementName=ClientContactInput}"/><TextBox x:Name="ClientContactInput" Text="{Binding ClientContact, UpdateSourceTrigger=PropertyChanged}" MaxLength="500" />
                         <Label Content="Notas do cliente" Target="{Binding ElementName=ClientNotesInput}"/><TextBox x:Name="ClientNotesInput" Text="{Binding ClientNotes, UpdateSourceTrigger=PropertyChanged}" MaxLength="4000" AcceptsReturn="True" TextWrapping="Wrap" Height="64" VerticalScrollBarVisibility="Auto"/>
@@ -72,7 +73,7 @@
                         <TextBlock Text="{Binding SelectedClient.Name, StringFormat=Cliente: {0}}" TextWrapping="Wrap"/>
                         <Label Content="Buscar equipamento, série ou notas" Target="{Binding ElementName=EquipmentSearchInput}"/><TextBox x:Name="EquipmentSearchInput" Text="{Binding EquipmentSearch, UpdateSourceTrigger=PropertyChanged}" MaxLength="4000" />
                         <Button Content="Buscar equipamentos" Command="{Binding SearchEquipmentCommand}" HorizontalAlignment="Left" Margin="0,8,0,0"/>
-                        <DataGrid ItemsSource="{Binding Equipment}" SelectedItem="{Binding SelectedEquipment, Mode=TwoWay}" Height="140" AutoGenerateColumns="False" IsReadOnly="True" CanUserAddRows="False" CanUserDeleteRows="False" SelectionMode="Single" SelectionUnit="FullRow" Margin="0,8,0,8" ScrollViewer.VerticalScrollBarVisibility="Auto" ScrollViewer.HorizontalScrollBarVisibility="Auto"><DataGrid.Columns><DataGridTextColumn Header="Equipamento" Binding="{Binding Name}" Width="*"/><DataGridTextColumn Header="Série" Binding="{Binding SerialNumber}" Width="*"/></DataGrid.Columns></DataGrid>
+                        <DataGrid ItemsSource="{Binding Equipment}" SelectedItem="{Binding SelectedEquipment, Mode=TwoWay}" Height="140" AutoGenerateColumns="False" IsReadOnly="True" CanUserAddRows="False" CanUserDeleteRows="False" SelectionMode="Single" SelectionUnit="FullRow" Margin="0,8,0,8" ScrollViewer.VerticalScrollBarVisibility="Auto" ScrollViewer.HorizontalScrollBarVisibility="Auto"><DataGrid.Columns><DataGridTextColumn Header="Equipamento" Binding="{Binding Name, Mode=OneWay}" Width="*"/><DataGridTextColumn Header="Série" Binding="{Binding SerialNumber, Mode=OneWay}" Width="*"/></DataGrid.Columns></DataGrid>
                         <Label Content="Nome do equipamento" Target="{Binding ElementName=EquipmentNameInput}"/><TextBox x:Name="EquipmentNameInput" Text="{Binding EquipmentName, UpdateSourceTrigger=PropertyChanged}" MaxLength="200" />
                         <Label Content="Número de série" Target="{Binding ElementName=EquipmentSerialInput}"/><TextBox x:Name="EquipmentSerialInput" Text="{Binding EquipmentSerial, UpdateSourceTrigger=PropertyChanged}" MaxLength="500" />
                         <Label Content="Notas do equipamento" Target="{Binding ElementName=EquipmentNotesInput}"/><TextBox x:Name="EquipmentNotesInput" Text="{Binding EquipmentNotes, UpdateSourceTrigger=PropertyChanged}" MaxLength="4000" AcceptsReturn="True" TextWrapping="Wrap" Height="64" VerticalScrollBarVisibility="Auto"/>
@@ -84,7 +85,7 @@
             <StackPanel>
                 <StackPanel.Style><Style TargetType="StackPanel"><Setter Property="Visibility" Value="Collapsed"/><Style.Triggers><DataTrigger Binding="{Binding Section}" Value="history"><Setter Property="Visibility" Value="Visible"/></DataTrigger></Style.Triggers></Style></StackPanel.Style>
                 <TextBlock Text="Últimas 200 execuções registradas. Histórico somente leitura." TextWrapping="Wrap"/>
-                <DataGrid ItemsSource="{Binding History}"  Height="330" AutoGenerateColumns="False" IsReadOnly="True" CanUserAddRows="False" CanUserDeleteRows="False" SelectionMode="Single" SelectionUnit="FullRow" Margin="0,8,0,8" ScrollViewer.VerticalScrollBarVisibility="Auto" ScrollViewer.HorizontalScrollBarVisibility="Auto"><DataGrid.Columns><DataGridTextColumn Header="Início" Binding="{Binding StartedAt}" Width="150"/><DataGridTextColumn Header="Ação" Binding="{Binding Title}" Width="180"/><DataGridTextColumn Header="Usuário" Binding="{Binding Actor}" Width="100"/><DataGridTextColumn Header="Sucesso" Binding="{Binding Success}" Width="75"/><DataGridTextColumn Header="Resultado" Binding="{Binding Message}" Width="300"/></DataGrid.Columns></DataGrid>
+                <DataGrid ItemsSource="{Binding History}"  Height="330" AutoGenerateColumns="False" IsReadOnly="True" CanUserAddRows="False" CanUserDeleteRows="False" SelectionMode="Single" SelectionUnit="FullRow" Margin="0,8,0,8" ScrollViewer.VerticalScrollBarVisibility="Auto" ScrollViewer.HorizontalScrollBarVisibility="Auto"><DataGrid.Columns><DataGridTextColumn Header="Início" Binding="{Binding StartedAt, Mode=OneWay}" Width="150"/><DataGridTextColumn Header="Ação" Binding="{Binding Title, Mode=OneWay}" Width="180"/><DataGridTextColumn Header="Usuário" Binding="{Binding Actor, Mode=OneWay}" Width="100"/><DataGridTextColumn Header="Sucesso" Binding="{Binding Success, Mode=OneWay}" Width="75"/><DataGridTextColumn Header="Resultado" Binding="{Binding Message, Mode=OneWay}" Width="300"/></DataGrid.Columns></DataGrid>
             </StackPanel>
 
             <StackPanel>

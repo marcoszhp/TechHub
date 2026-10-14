@@ -244,13 +244,16 @@ public sealed class DriverService(IPowerShellExecutor powerShellExecutor, IActio
 
     private static void Query(string query, Action<ManagementObject> consume, CancellationToken ct)
     {
+        ct.ThrowIfCancellationRequested();
         using var searcher = new ManagementObjectSearcher("root\\CIMV2", query,
             new System.Management.EnumerationOptions { Timeout = TimeSpan.FromSeconds(30), ReturnImmediately = true });
         using var results = searcher.Get();
+        ct.ThrowIfCancellationRequested();
         foreach (ManagementObject item in results)
         {
             using (item) { ct.ThrowIfCancellationRequested(); consume(item); }
         }
+        ct.ThrowIfCancellationRequested();
     }
 
     private static string? Text(ManagementObject item, string property) => Convert.ToString(item[property], CultureInfo.InvariantCulture);

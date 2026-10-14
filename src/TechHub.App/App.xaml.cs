@@ -14,6 +14,8 @@ namespace TechHub.App;
 public partial class App : Application
 {
     private IHost? _host;
+    private string? _logsDirectory;
+    private bool _closingAfterFatalError;
 
     public App()
     {
@@ -23,9 +25,13 @@ public partial class App : Application
 
     private void OnDispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
     {
-        Log.Error(e.Exception, "Falha não tratada na interface");
+        Log.Fatal(e.Exception, "Falha inesperada na interface; encerrando para evitar estado inconsistente");
         e.Handled = true;
-        MessageBox.Show("O TechHub encontrou uma falha nesta operação e continuou aberto.\n\nConsulte o log em %LocalAppData%\\TechHub\\Data\\Logs.", "TechHub — operação interrompida", MessageBoxButton.OK, MessageBoxImage.Warning);
+        if (_closingAfterFatalError) return;
+        _closingAfterFatalError = true;
+        MessageBox.Show($"O TechHub encontrou um erro inesperado e precisa ser fechado.\n\nOs registros já salvos permanecem no computador. Alterações ainda não salvas podem ser perdidas.\n\nDetalhes: {_logsDirectory ?? "pasta de logs da aplicação"}",
+            "TechHub — reinicialização necessária", MessageBoxButton.OK, MessageBoxImage.Error);
+        Shutdown(1);
     }
 
     private void OnUnobservedTaskException(object? sender, UnobservedTaskExceptionEventArgs e)
@@ -40,10 +46,12 @@ public partial class App : Application
         try
         {
         var paths = new ApplicationPathsProvider();
+        _logsDirectory = paths.Current.LogsDirectory;
 
         _host = Host.CreateDefaultBuilder(e.Args)
             .UseSerilog((_, loggerConfiguration) => loggerConfiguration
                 .MinimumLevel.Information()
+                .Enrich.WithProperty("ApplicationVersion", typeof(App).Assembly.GetName().Version?.ToString(3))
                 .WriteTo.File(
                     Path.Combine(paths.Current.LogsDirectory, "techhub-.log"),
                     rollingInterval: RollingInterval.Day,
@@ -75,6 +83,8 @@ public partial class App : Application
             .Build();
 
         await _host.StartAsync();
+        Log.Information("Iniciando TechHub {Version}; executável {Executable}",
+            typeof(App).Assembly.GetName().Version?.ToString(3), Environment.ProcessPath);
         var mainWindow = _host.Services.GetRequiredService<MainWindow>();
         MainWindow = mainWindow;
         mainWindow.Show();

@@ -1,6 +1,8 @@
 # TechHub
 
-TechHub é um aplicativo desktop para diagnóstico e manutenção de computadores Windows. As Fases 1 e 2 estão implementadas em C#/.NET 8 com WPF, WPF-UI, MVVM, Generic Host/DI, SQLite, Serilog e PowerShell 7 embarcado.
+TechHub é um aplicativo desktop para diagnóstico e manutenção de computadores Windows, em C#/.NET 8 com WPF, WPF-UI, MVVM, Generic Host/DI, SQLite, Serilog e PowerShell 7 embarcado.
+
+O lote 1.2.1 corrige estabilidade de consultas e consolida o tema escuro. Veja [evidências, limites e próximas etapas](docs/ESTABILIDADE-1.2.1.md) e o [prompt mestre de evolução](docs/PROMPT-MESTRE-EVOLUCAO-TECHHUB.md). Módulo implementado não significa que todos os seus fluxos foram validados.
 
 ## Stack
 
@@ -74,8 +76,11 @@ Pré-requisitos: Windows e SDK do .NET 8. Na raiz do repositório:
 dotnet restore .\TechHub.sln --configfile .\NuGet.Config
 dotnet build .\TechHub.sln --configuration Release
 dotnet test .\tests\TechHub.Tests\TechHub.Tests.csproj --configuration Debug
+dotnet test .\tests\TechHub.Ui.Tests\TechHub.Ui.Tests.csproj --configuration Release --filter "Category!=WindowsIntegration"
 dotnet run --project .\src\TechHub.App\TechHub.App.csproj
 ```
+
+As duas consultas reais de Diagnósticos/Drivers são opcionais e somente leitura: execute a suíte `TechHub.Ui.Tests` com `--filter "Category=WindowsIntegration"` apenas numa máquina Windows autorizada. A suíte WPF exige sessão Windows; não executa reparos nem instalações. Para salvar as prévias automatizadas, defina `TECHHUB_UI_SNAPSHOT_DIR` com uma pasta de saída.
 
 Para gerar uma pasta portátil autocontida, use `publish.ps1`. O script publica `win-x64`, copia `portable.flag` e mantém o estado em `Data`:
 

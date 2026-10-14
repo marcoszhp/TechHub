@@ -16,11 +16,12 @@ public sealed class WindowsDiagnosticService(
 
     public async Task<DiagnosticSnapshot> GetSnapshotAsync(CancellationToken cancellationToken = default)
     {
+        cancellationToken.ThrowIfCancellationRequested();
         try
         {
             var json = await powerShell.ExecuteAsync("""
-                $os = Get-CimInstance Win32_OperatingSystem
-                $disks = @(Get-CimInstance Win32_DiskDrive -ErrorAction SilentlyContinue | Select-Object Model,Status,Size,SerialNumber)
+                $os = Get-CimInstance Win32_OperatingSystem -OperationTimeoutSec 10
+                $disks = @(Get-CimInstance Win32_DiskDrive -OperationTimeoutSec 10 -ErrorAction SilentlyContinue | Select-Object Model,Status,Size,SerialNumber)
                 $events = @(Get-WinEvent -FilterHashtable @{LogName='System'; Level=1,2} -MaxEvents 12 -ErrorAction SilentlyContinue | ForEach-Object {
                     [pscustomobject]@{ TimeCreated = $_.TimeCreated; Provider = $_.ProviderName; Id = $_.Id; Level = $_.LevelDisplayName; Message = $_.Message }
                 })
@@ -33,6 +34,7 @@ public sealed class WindowsDiagnosticService(
                 } | ConvertTo-Json -Depth 6 -Compress
                 """, cancellationToken).ConfigureAwait(false);
 
+            cancellationToken.ThrowIfCancellationRequested();
             var payload = JsonSerializer.Deserialize<DiagnosticPayload>(json, JsonOptions);
             if (payload is null)
             {
@@ -50,6 +52,7 @@ public sealed class WindowsDiagnosticService(
             if (recommendations.Count == 0)
                 recommendations.Add("Nenhum alerta crítico foi encontrado nesta coleta básica.");
 
+            cancellationToken.ThrowIfCancellationRequested();
             return new DiagnosticSnapshot(
                 payload.OperatingSystem ?? "Desconhecido",
                 payload.OsVersion ?? "Desconhecida",

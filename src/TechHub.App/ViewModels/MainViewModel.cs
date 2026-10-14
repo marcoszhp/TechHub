@@ -22,6 +22,9 @@ public sealed class MainViewModel(
     private readonly HashSet<string> _loading = [];
     private string _currentModule = "dashboard";
     private string _loadStatus = "Pronto · dados armazenados localmente";
+    public string ApplicationVersion { get; } =
+        typeof(MainViewModel).Assembly.GetName().Version?.ToString(3) ?? "desenvolvimento";
+    public string ApplicationVersionLabel => $"TechHub {ApplicationVersion} · Ações de sistema exigem confirmação";
     public string LoadStatus { get => _loadStatus; private set => SetProperty(ref _loadStatus, value); }
     public WorkspaceViewModel Workspace { get; } = workspace;
     public DashboardViewModel Dashboard { get; } = dashboard;
@@ -65,7 +68,11 @@ public sealed class MainViewModel(
             return;
         }
         if (_loading.Contains(module)) { LoadStatus = "Consulta em andamento… você pode continuar navegando."; return; }
-        if (_loaded.Contains(module)) { LoadStatus = "Pronto · use Atualizar para consultar novamente"; return; }
+        // A failed manual refresh must not leave a module permanently marked as loaded.
+        if (module == "diagnostics" && !Diagnostics.LastRefreshSucceeded ||
+            module == "drivers" && !Drivers.LastRefreshSucceeded)
+            _loaded.Remove(module);
+        if (_loaded.Contains(module)) { LoadStatus = "Pronto · use Atualizar dados para consultar novamente"; return; }
         _loading.Add(module);
         LoadStatus = "Consultando dados locais… você pode continuar navegando.";
         try
@@ -81,6 +88,13 @@ public sealed class MainViewModel(
                 case "tickets": await Tickets.RefreshAsync(); break;
                 case "software": await Software.RefreshAsync(); break;
                 case "automation": await Automation.RefreshAsync(); break;
+            }
+            if (module == "diagnostics" && !Diagnostics.LastRefreshSucceeded ||
+                module == "drivers" && !Drivers.LastRefreshSucceeded)
+            {
+                if (_currentModule == module)
+                    LoadStatus = "Consulta incompleta · consulte o aviso do módulo e tente novamente em Atualizar dados.";
+                return;
             }
             _loaded.Add(module);
             if (_currentModule == module) LoadStatus = "Pronto · consulte o estado da operação na área de trabalho";
