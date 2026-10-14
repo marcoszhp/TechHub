@@ -68,17 +68,24 @@ public sealed partial class DiagnosticsViewModel : ObservableObject
 
     private async Task RunRepairAsync(DiagnosticRepairKind kind)
     {
-        var request = _service.CreateRepairRequest(kind);
-        var preview = await _actionRunner.PreviewAsync(request).ConfigureAwait(true);
-        if (!await _confirmation.ConfirmAsync(preview).ConfigureAwait(true))
+        try
         {
-            StatusMessage = "Reparo cancelado.";
-            return;
-        }
+            var request = _service.CreateRepairRequest(kind);
+            var preview = await _actionRunner.PreviewAsync(request).ConfigureAwait(true);
+            if (!await _confirmation.ConfirmAsync(preview).ConfigureAwait(true))
+            {
+                StatusMessage = "Reparo cancelado.";
+                return;
+            }
 
-        var result = await _actionRunner.ExecuteAsync(
-            request,
-            new ActionExecutionContext(true, true, Environment.UserName)).ConfigureAwait(true);
-        StatusMessage = result.Success ? result.Message : $"Falha no reparo: {result.Message}";
+            var result = await _actionRunner.ExecuteAsync(
+                request,
+                new ActionExecutionContext(true, true, Environment.UserName)).ConfigureAwait(true);
+            StatusMessage = result.Success ? result.Message : $"Falha no reparo: {result.Message}";
+        }
+        catch (Exception exception)
+        {
+            StatusMessage = $"Reparo não executado: {exception.Message}";
+        }
     }
 }
