@@ -20,6 +20,17 @@ Atualizado em: 2026-10-14
 - A rodada anterior foi interrompida ao atingir5% restante. Ao retomar, uso13% da janela5h e51% semanal; não resgatados resets/créditos.
 - O histórico de builds abaixo refere-se à versão anterior, NÃO valida o trabalho1.1.
 
+## Estado verificado em 2026-10-14
+
+- Build App Release passou com 0 avisos/0 erros; suíte completa passou 108/108.
+- Correção visual do mapa: bindings OneWay nos textos somente leitura evitaram encerramento ao abrir a tela; App compilado depois da correção.
+- Processo da interface permaneceu respondendo aberto no Windows durante a inspeção. Clique automatizado no mapa foi interrompido por interação do usuário; não foi executada varredura de rede.
+- Publicação GitHub: `https://github.com/marcoszhp/TechHub/releases/tag/v1.1.0`, assets Setup, Portable ZIP e SHA256SUMS enviados e verificados por tamanho; release pública.
+- Página Cloudflare Pages publicada em `https://c6f30a0b.techhub-downloads.pages.dev`; verificação via Wrangler confirmou deployment. Request PowerShell local teve handshake TLS e a ferramenta web não abriu a URL, portanto manter essa limitação registrada.
+- R2 não ativado. Binaries ficam no GitHub Releases porque Pages limita asset individual a 25 MiB.
+- Qwen: memória de `local-qwen-executor` reutilizada; Ollama 0.40.2 foi iniciado e modelo configurado confirmado. Nesta rodada o Qwen não recebeu alteração do TechHub; a revisão e integração permaneceram com o coordenador.
+- Próximo passo: se necessário, revisar a página Cloudflare por navegador normal, abrir a release no computador e testar uma varredura somente após consentimento explícito na tela.
+
 ## Objetivo
 
 Implementar e validar as fases do aplicativo desktop TechHub em C#/.NET 8, WPF + WPF-UI, MVVM, DI/Hosting, SQLite, Serilog e PowerShell 7 embarcado.
