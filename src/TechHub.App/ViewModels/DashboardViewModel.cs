@@ -8,6 +8,8 @@ namespace TechHub.App.ViewModels;
 public sealed partial class DashboardViewModel : ObservableObject
 {
     private readonly IDashboardService _dashboardService;
+    private readonly IUpdateService _updateService;
+    private UpdateInfo? _availableUpdate;
 
     [ObservableProperty] private int? healthScore;
     [ObservableProperty] private double? cpuUsagePercent;
@@ -17,14 +19,43 @@ public sealed partial class DashboardViewModel : ObservableObject
     [ObservableProperty] private string operatingSystem = "—";
     [ObservableProperty] private string privilegeText = "—";
     [ObservableProperty] private string statusMessage = "Carregando métricas…";
+    [ObservableProperty] private string updateStatus = "Atualizações: não verificadas";
+    [ObservableProperty] private bool updateAvailable;
 
     public ObservableCollection<string> Alerts { get; } = [];
     public IAsyncRelayCommand RefreshCommand { get; }
+    public IAsyncRelayCommand CheckUpdatesCommand { get; }
+    public IAsyncRelayCommand InstallUpdateCommand { get; }
 
-    public DashboardViewModel(IDashboardService dashboardService)
+    public DashboardViewModel(IDashboardService dashboardService, IUpdateService updateService)
     {
         _dashboardService = dashboardService;
+        _updateService = updateService;
         RefreshCommand = new AsyncRelayCommand(RefreshAsync);
+        CheckUpdatesCommand = new AsyncRelayCommand(CheckUpdatesAsync);
+        InstallUpdateCommand = new AsyncRelayCommand(InstallUpdateAsync, () => UpdateAvailable);
+    }
+
+    private async Task CheckUpdatesAsync()
+    {
+        UpdateStatus = "Verificando atualizações…";
+        var result = await _updateService.CheckAsync().ConfigureAwait(true);
+        _availableUpdate = result;
+        UpdateAvailable = result.IsAvailable;
+        UpdateStatus = result.Message;
+        InstallUpdateCommand.NotifyCanExecuteChanged();
+    }
+
+    private async Task InstallUpdateAsync()
+    {
+        if (_availableUpdate is not { IsAvailable: true } update) return;
+        try
+        {
+            UpdateStatus = "Baixando o instalador da nova versão…";
+            var path = await _updateService.DownloadAndLaunchAsync(update).ConfigureAwait(true);
+            UpdateStatus = $"Instalador baixado em {path}. Feche o TechHub para concluir a atualização.";
+        }
+        catch (Exception exception) { UpdateStatus = $"Falha ao baixar atualização: {exception.Message}"; }
     }
 
     public async Task RefreshAsync()

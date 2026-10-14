@@ -1,5 +1,5 @@
 #define MyAppName "TechHub"
-#define MyAppVersion "1.1.0"
+#define MyAppVersion "1.2.0"
 #define MyAppPublisher "TechHub"
 #define MyAppExeName "TechHub.App.exe"
 

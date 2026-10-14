@@ -28,7 +28,11 @@
                 <ScrollViewer VerticalScrollBarVisibility="Auto">
                     <StackPanel Margin="24,8,8,8">
                         <DockPanel Margin="0,0,0,18">
-                            <Button Width="120" HorizontalAlignment="Right" Command="{Binding Dashboard.RefreshCommand}" Content="Atualizar" DockPanel.Dock="Right" />
+                            <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
+                                <Button Margin="0,4,8,4" Command="{Binding Dashboard.CheckUpdatesCommand}" Content="Verificar atualização" />
+                                <Button Margin="0,4,0,4" Command="{Binding Dashboard.InstallUpdateCommand}" Content="Instalar nova versão" IsEnabled="{Binding Dashboard.UpdateAvailable}" />
+                                <Button Margin="8,4,0,4" Command="{Binding Dashboard.RefreshCommand}" Content="Atualizar" />
+                            </StackPanel>
                             <StackPanel>
                                 <TextBlock FontSize="22" FontWeight="SemiBold" Text="Saúde do computador" />
                                 <TextBlock Foreground="#A7B6C8" Text="Métricas locais, sem telemetria automática." />
@@ -76,7 +80,8 @@
                                 </ItemsControl.ItemTemplate>
                             </ItemsControl>
                         </GroupBox>
-                        <TextBlock Margin="0,12,0,0" Foreground="#667085" Text="{Binding Dashboard.StatusMessage}" />
+                        <TextBlock Margin="0,12,0,0" Foreground="#A7B6C8" Text="{Binding Dashboard.StatusMessage}" />
+                        <TextBlock Margin="0,6,0,0" Foreground="#60A5FA" Text="{Binding Dashboard.UpdateStatus}" TextWrapping="Wrap" />
                         <TextBlock Margin="0,12,0,0" FontSize="11" Foreground="#667085" Text="¹ Estimativa baseada em CPU, memória e espaço em disco. Não substitui diagnóstico de hardware ou segurança." TextWrapping="Wrap" />
                     </StackPanel>
                 </ScrollViewer>

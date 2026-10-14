@@ -13,6 +13,7 @@ using TechHub.Infrastructure.Software;
 using TechHub.Infrastructure.Storage;
 using TechHub.Infrastructure.Support;
 using TechHub.Infrastructure.Workspace;
+using TechHub.Infrastructure.Updates;
 
 namespace TechHub.Infrastructure;
 
@@ -40,6 +41,7 @@ public static class DependencyInjection
         services.AddSingleton<IAutomationService, JsonAutomationService>();
         services.AddSingleton<IDiagnosticAssistant, OfflineDiagnosticAssistant>();
         services.AddSingleton<ISubnetCalculator, SubnetCalculator>();
+        services.AddSingleton<IUpdateService, GitHubUpdateService>();
         services.AddTechHubWorkspace();
         return services;
     }

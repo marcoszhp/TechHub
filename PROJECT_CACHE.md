@@ -2,6 +2,13 @@
 
 Atualizado em: 2026-10-14
 
+## Estado atual — atualização integrada (2026-10-14)
+
+- Implementado o fluxo de atualização no Dashboard: consulta a release mais recente do GitHub, compara a versão instalada, baixa o instalador sem administrador pelo R2 e abre o instalador sob comando do usuário.
+- Versão do aplicativo e dos instaladores atualizada para `1.2.0`; os artefatos foram compilados e os checksums gerados.
+- Publicação em R2 preparada em `releases/1.2.0/`; a página `downloads/index.html` aponta para os novos arquivos.
+- Próximo passo operacional: publicar a release GitHub `v1.2.0`, enviar o commit e implantar a página Cloudflare Pages.
+
 ## Workspace — entrega focada (2026-10-14)
 
 - Criados `src/TechHub.App/Views/WorkspaceView.xaml` e `.xaml.cs`: seis seções por DataTriggers sobre o singleton existente, sem alterar Section no Loaded; formulários rotulados, seleção/busca/gravação/novo para clientes e equipamentos, PC e histórico readonly, ferramentas allowlist, console fixo com scroll/cancelamento, avisos de restauração separada e abertura de caminhos.
