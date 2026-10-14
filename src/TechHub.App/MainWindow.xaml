@@ -21,6 +21,11 @@
         </Grid.RowDefinitions>
 
         <ui:TitleBar Grid.Row="0" Title="TechHub — Manutenção e Suporte" />
+        <StackPanel Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,4,112,0" VerticalAlignment="Center">
+            <TextBlock Text="Tema" VerticalAlignment="Center" Margin="0,0,8,0" Foreground="#475467" />
+            <Button Click="OnLightThemeClick" Content="☀ Claro" Padding="10,4" Margin="0,0,4,0" AutomationProperties.Name="Usar tema claro" />
+            <Button Click="OnDarkThemeClick" Content="☾ Escuro" Padding="10,4" AutomationProperties.Name="Usar tema escuro" />
+        </StackPanel>
 
         <TabControl x:Name="Navigation" Grid.Row="1" Style="{StaticResource HubNavigation}" SelectionChanged="OnNavigationChanged">
             <TabItem Header="Dashboard" Uid="dashboard" Tag="&#xE80F;">

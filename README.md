@@ -44,6 +44,7 @@ Os critérios verificáveis estão em [Fase 1](docs/PHASE-1-ACCEPTANCE.md).
 - Limpeza: análise Seguro/Profundo com catálogo restrito, prévia de arquivos/bytes/motivos, proteção contra reparse points e revalidação antes da exclusão.
 - Diagnóstico: discos, eventos críticos recentes, uptime e reparos SFC/DISM protegidos por confirmação, privilégio e ponto de restauração.
 - Segurança: Defender, proteção em tempo real, firewall, BitLocker, TPM, Secure Boot e administradores locais; varredura rápida confirmada.
+- Distribuição: além do instalador administrativo, há um instalador **TechHub User** que instala em `%LocalAppData%` sem UAC. Ele permite as funções de leitura, diagnóstico, rede, chamados, relatórios e limpeza do perfil do usuário; operações protegidas pelo Windows continuam identificadas e bloqueadas com segurança.
 
 Os critérios verificáveis estão em [Fase 2](docs/PHASE-2-ACCEPTANCE.md).
 
