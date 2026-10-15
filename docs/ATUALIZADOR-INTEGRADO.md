@@ -1,4 +1,6 @@
-# D1 — atualização integrada (candidata 1.3.0)
+# D1 — atualização integrada 1.3.0
+
+Estado atual: publicada e instalada em15/10/2026. Os checkpoints anteriores são históricos; consulte a seção final de publicação para o aceite e as limitações vigentes.
 
 ## Contrato de execução — 14/10/2026
 
@@ -38,3 +40,14 @@ Regra preventiva atingida: 97% da janela principal consumida (3% restante). Cont
 - Revisão independente Sol/medium confirmou diretamente correções de deadline/descarte e encontrou duas condições adicionais. Corrigidas e rerevisadas: tentativa abandonada grava `aborted`, validada antes do mutex; máquina usa marcadores globais com ACL AU–SYNCHRONIZE e rechecagem de startup, Inno consulta Local+GlobalRunning. Testes determinísticos cobrem o retry e vida útil dos marcadores. Helper HTTPS sem redirecionamentos e com limite de1MiB.
 - Resultados anteriores do atualizador não são lidos no perfil instalado quando o app está portátil. Confirmação final de reinício depois do download protege trabalho que possa ter sido editado nesse intervalo.
 - Aceite: código revisado, componentes reais críticos exercitados e pacote candidato pode ser gerado. Não declarar homologação universal: duas contas/RDS, UAC com outro SID e o clique completo consentimento→auxiliar em uma instalação já distribuída ainda não foram exercitados. Esses limites devem acompanhar a release; D2 permanece pendente.
+
+## Publicação e instalação — 15/10/2026
+
+- Fonte de produção: commit `1ea7e1f3991c4f47f8338e7697d02a5351baa5c4`, enviado a main e alvo da release estável `v1.3.0`, ID413685522. [Release pública](https://github.com/marcoszhp/TechHub/releases/tag/v1.3.0) confirmada como latest pela API pública, com quatro assets.
+- App e auxiliar publicados autocontidos win-x64; auxiliar iniciou sem dependência externa e retornou2 sem argumentos, como previsto. Instaladores usuário/máquina compilados com Inno6.7.3. ZIP possui21 entradas, incluindo App, Updater e portable.flag, sem dados privados ou artefatos de teste.
+- Tamanho e SHA-256 dos quatro assets GitHub comparados aos arquivos locais antes e depois da publicação. Os quatro objetos R2 foram baixados integralmente em fluxo, retornaram HTTP200 e seus hashes coincidiram. Manifesto em `artifacts/release-1.3.0/github-assets/SHA256SUMS.txt`; pacote de usuário135754100 bytes, máquina135754091, portátil199755966 e manifesto289.
+- [Site canônico](https://techhub-downloads.pages.dev/) atualizado e conferido: HTTP200, versão1.3.0 e quatro links corretos. Deploy `d28b6324`; texto de preparação substituído por disponibilidade efetiva. Apenas a pasta pública `downloads` foi implantada.
+- Instalação local por usuário realizada com o pacote de hash validado, saída0, sem reinício do Windows; App/Updater1.3.0.0 confirmados. Backup privado em `artifacts/local-user-backup-before-1.3.0`; hashes dos arquivos de dados preservados. Nenhum backup, banco ou log local enviado à distribuição. Instalação antiga de máquina1.1.0 mantida.
+- App instalado aberto em15/10 às07:37, PID5972, executável do perfil do usuário, janela respondendo e log registrando1.3.0. Essa verificação prova a inicialização, não o fluxo completo por clique da atualização. Não foi executada manutenção Windows nem alteração de drivers.
+- Resultado delimitado: D1 distribuída, com243 testes e verificações compostas descritas acima. UAC de outra conta, múltiplas sessões e fluxo completo por clique continuam pendentes; sem assinatura de código ou rollback automático. Portátil/personalizado continuam manuais. Próxima validação entre versões oficiais deve aproveitar uma nova versão real, sem publicação fictícia apenas para teste.
+- Recuperação: pacote anterior1.2.1 continua disponível para reparação manual; backup privado preservado. Não restaurar dados automaticamente nem executar downgrade sem verificar compatibilidade e autorização.

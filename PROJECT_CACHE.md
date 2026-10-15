@@ -1,6 +1,20 @@
 # TechHub — cache do projeto
 
-Atualizado em: 2026-10-14
+Atualizado em: 2026-10-15
+
+## Estado atual — 1.3.0 publicada e instalada (15/10/2026)
+
+- D1 entregue: atualização pelo Dashboard para instalações padrão Windows x64 por usuário/máquina. Fonte de produção no commit `1ea7e1f3991c4f47f8338e7697d02a5351baa5c4`, enviado a main. Não refazer builds/testes sem mudança ou dúvida nova.
+- Release pública estável/latest `v1.3.0`, ID413685522, conferida pela API pública: https://github.com/marcoszhp/TechHub/releases/tag/v1.3.0. Quatro assets com tamanho/digest SHA-256 comparados aos arquivos locais antes e depois da publicação.
+- R2: quatro objetos em `techhub-downloads/releases/1.3.0/`, todos baixados integralmente em fluxo e SHA-256 conferidos. Site canônico https://techhub-downloads.pages.dev/ retorna HTTP200, versão1.3.0 e quatro links corretos. Snapshot do deploy: https://d28b6324.techhub-downloads.pages.dev. Texto provisório do site removido.
+- Pacotes aprovados em `artifacts/release-1.3.0/github-assets`: instalador usuário135754100 bytes, máquina135754091, portátil199755966 e manifesto289. ZIP conferido:21 entradas, App/Updater/portable.flag presentes, sem Data/Logs/Updates/fixtures/bancos/PDB. Backups privados não foram publicados.
+- Instalação por usuário concluída com saída0: App e Updater1.3.0.0 em `C:\Users\marco\AppData\Local\TechHub`. Hashes dos dados antes/depois preservados; backup privado em `artifacts/local-user-backup-before-1.3.0`. Aberto em15/10 às07:37 (PID5972), janela respondendo e log confirmando1.3.0. Instalação antiga de máquina1.1.0 e dados mantidos.
+- Validação reaproveitada:243 testes aprovados, integração Inno real isolada, preservação/backup de dados, reinício no mesmo usuário, consulta GitHub real com rejeição de digest adulterado e ciclo de vida do WPF sem processo residual. Detalhes e caminhos em `docs/ATUALIZADOR-INTEGRADO.md`.
+- Limites continuam explícitos: fluxo inteiro por clique no aplicativo instalado, duas contas/RDS e UAC de outro SID não exercitados. Sem certificado de assinatura, atualização portátil/personalizada, verificação periódica ou rollback automático. Não declarar toda a fase D concluída.
+- Próxima etapa: validar ponta a ponta a atualização entre duas versões oficiais quando existir nova versão real; não publicar incremento fictício apenas para teste. Depois priorizar D2 e demais fases do prompt mestre, com critérios e autorização específicos quando ampliarem escopo. Usuário usa Dashboard > Verificar atualização > Atualizar e reiniciar; a própria1.3.0 deve indicar versão atualizada.
+- Nenhum subagente ativo. Última consulta de limites:19% principal/3% secundário usados, sem créditos/reset acionados. Publicação autorizada pelo usuário; não reenviar e-mail histórico sem novo pedido.
+
+## Histórico D1 — checkpoints abaixo não representam o estado atual
 
 ## Retomada D1 — 14/10/2026, 23:32
 
