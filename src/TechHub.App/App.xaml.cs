@@ -8,6 +8,9 @@ using TechHub.App.Services;
 using TechHub.App.ViewModels;
 using TechHub.Infrastructure;
 using TechHub.Infrastructure.Storage;
+using TechHub.Core.Services;
+using TechHub.Core.Updates;
+using TechHub.Infrastructure.Updates;
 
 namespace TechHub.App;
 
@@ -16,6 +19,10 @@ public partial class App : Application
     private IHost? _host;
     private string? _logsDirectory;
     private bool _closingAfterFatalError;
+    private bool _shutdownStarted;
+    private bool _hostStopped;
+    private Mutex? _runningMarker;
+    private MachineUpdateMarker? _machineRunningMarker;
 
     public App()
     {
@@ -45,6 +52,28 @@ public partial class App : Application
         base.OnStartup(e);
         try
         {
+        var isMachine = UpdatePolicy.SamePath(AppContext.BaseDirectory, UpdatePolicy.DefaultDirectory(UpdateInstallMode.Machine));
+        if (Mutex.TryOpenExisting("Local\\TechHub.Update.InProgress", out var updateMarker) ||
+            isMachine && MachineUpdateMarker.Exists(MachineUpdateMarker.Updating))
+        {
+            updateMarker?.Dispose();
+            MessageBox.Show("Uma atualização está em andamento. Aguarde a conclusão para abrir o TechHub.", "TechHub");
+            Shutdown();
+            return;
+        }
+        _runningMarker = new Mutex(false, "Local\\TechHub.App.Running");
+        if (isMachine)
+        {
+            _machineRunningMarker = MachineUpdateMarker.Create(MachineUpdateMarker.Running, out _);
+            // Closes the race between the first check and publishing this app's running marker.
+            if (MachineUpdateMarker.Exists(MachineUpdateMarker.Updating)) { Shutdown(); return; }
+        }
+        if (Mutex.TryOpenExisting("Local\\TechHub.Update.InProgress", out var startedUpdate))
+        {
+            startedUpdate.Dispose();
+            Shutdown();
+            return;
+        }
         var paths = new ApplicationPathsProvider();
         _logsDirectory = paths.Current.LogsDirectory;
 
@@ -64,6 +93,7 @@ public partial class App : Application
                 services.AddSingleton(paths);
                 services.AddSingleton<TechHub.Core.Services.IApplicationPaths>(paths);
                 services.AddSingleton<IActionConfirmationService, MessageBoxActionConfirmationService>();
+                services.AddSingleton<IUpdateInstaller, DesktopUpdateInstaller>();
                 services.AddSingleton<DashboardViewModel>();
                 services.AddSingleton<PrintersViewModel>();
                 services.AddSingleton<NetworkViewModel>();
@@ -87,6 +117,18 @@ public partial class App : Application
             typeof(App).Assembly.GetName().Version?.ToString(3), Environment.ProcessPath);
         var mainWindow = _host.Services.GetRequiredService<MainWindow>();
         MainWindow = mainWindow;
+        mainWindow.Closing += async (_, args) =>
+        {
+            if (_shutdownStarted || _closingAfterFatalError) return;
+            args.Cancel = true;
+            var dashboard = _host.Services.GetRequiredService<DashboardViewModel>();
+            if (dashboard.InstallUpdateCommand.IsRunning)
+            {
+                MessageBox.Show(mainWindow, "Aguarde a atualização ou cancele o download antes de fechar.", "TechHub");
+                return;
+            }
+            await ShutdownForUpdateAsync();
+        };
         mainWindow.Show();
         await _host.Services.GetRequiredService<MainViewModel>().InitializeAsync();
         }
@@ -98,14 +140,24 @@ public partial class App : Application
         }
     }
 
-    protected override async void OnExit(ExitEventArgs e)
+    internal async Task ShutdownForUpdateAsync()
     {
-        if (_host is not null)
+        if (_shutdownStarted) return;
+        _shutdownStarted = true;
+        if (_host is not null && !_hostStopped)
         {
-            await _host.StopAsync(TimeSpan.FromSeconds(3));
-            _host.Dispose();
+            try { await _host.StopAsync(TimeSpan.FromSeconds(3)); }
+            catch (Exception exception) { Log.Warning(exception, "Falha ao parar serviços no encerramento"); }
+            _hostStopped = true;
         }
+        Shutdown();
+    }
 
+    protected override void OnExit(ExitEventArgs e)
+    {
+        _host?.Dispose();
+        _runningMarker?.Dispose();
+        _machineRunningMarker?.Dispose();
         Log.CloseAndFlush();
         base.OnExit(e);
     }

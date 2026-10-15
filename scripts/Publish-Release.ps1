@@ -1,6 +1,6 @@
 param(
     [Parameter(Mandatory)][string]$AssetDirectory,
-    [ValidatePattern('^v\d+\.\d+\.\d+$')][string]$Tag = 'v1.2.1',
+    [ValidatePattern('^v\d+\.\d+\.\d+$')][string]$Tag = 'v1.3.0',
     [long]$ReleaseId = 0,
     [switch]$Publish
 )
@@ -54,7 +54,7 @@ try {
         if (!(Test-Path -LiteralPath (Join-Path $AssetDirectory $name) -PathType Leaf)) { throw "Arquivo ausente: $name" }
     }
     $notes = Get-Content -LiteralPath (Join-Path $PSScriptRoot "..\docs\RELEASE-$version.md") -Raw
-    $body = @{ tag_name=$Tag; target_commitish=$commit.Trim(); name="TechHub $version — estabilidade e tema escuro"; body=$notes; draft=$true; prerelease=$false } | ConvertTo-Json
+    $body = @{ tag_name=$Tag; target_commitish=$commit.Trim(); name="TechHub $version"; body=$notes; draft=$true; prerelease=$false } | ConvertTo-Json
     $release = Invoke-RestMethod -Uri "$api/releases" -Headers $headers -Method Post -ContentType 'application/json; charset=utf-8' -Body ([Text.Encoding]::UTF8.GetBytes($body))
     $uploadBase = $release.upload_url -replace '\{.*$',''
     foreach ($name in $assetNames) {

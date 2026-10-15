@@ -1,5 +1,7 @@
 #define MyAppName "TechHub"
-#define MyAppVersion "1.2.1"
+#ifndef MyAppVersion
+#define MyAppVersion "1.3.0"
+#endif
 #define MyAppPublisher "TechHub"
 #define MyAppExeName "TechHub.App.exe"
 
@@ -17,6 +19,9 @@ SolidCompression=yes
 ArchitecturesInstallIn64BitMode=x64
 PrivilegesRequired=admin
 UninstallDisplayIcon={app}\{#MyAppExeName}
+AppMutex=Local\TechHub.App.Running,Global\TechHub.App.Machine.Running
+CloseApplications=no
+RestartApplications=no
 
 [Files]
 Source: "{#SourceDir}\*"; DestDir: "{app}"; Excludes: "portable.flag,Data\*,*.pdb"; Flags: recursesubdirs ignoreversion
@@ -31,3 +36,10 @@ Type: files; Name: "{app}\portable.flag"
 
 [Run]
 Filename: "{app}\{#MyAppExeName}"; Description: "Abrir TechHub"; Flags: nowait postinstall skipifsilent
+
+[Code]
+procedure CurStepChanged(CurStep: TSetupStep);
+begin
+  if CurStep = ssPostInstall then
+    SaveStringToFile(ExpandConstant('{app}\install-mode.txt'), 'Machine', False);
+end;

@@ -1,4 +1,5 @@
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using TechHub.Core.Models;
 
 namespace TechHub.App.ViewModels;
@@ -57,6 +58,19 @@ public sealed class MainViewModel(
     ];
 
     public Task InitializeAsync() => LoadModuleAsync("dashboard");
+
+    public bool HasActiveWorkForUpdate()
+    {
+        if (_loading.Count != 0 || Diagnostics.IsBusy || Drivers.IsBusy || Cleaning.IsBusy ||
+            Network.IsScanning || Network.IsRefreshing || Workspace.IsBusy || Workspace.IsDiagnosticRunning ||
+            Dashboard.RefreshCommand.IsRunning) return true;
+        object[] modules = [Printers, Network, Diagnostics, Security, Drivers, Cleaning, Tickets, Reports, Software, Automation, Assistant, Workspace];
+        // Covers every public async action, including new module commands, without invoking actions.
+        return modules.SelectMany(module => module.GetType().GetProperties()
+                .Where(property => typeof(IAsyncRelayCommand).IsAssignableFrom(property.PropertyType))
+                .Select(property => property.GetValue(module)))
+            .OfType<IAsyncRelayCommand>().Any(command => command.IsRunning);
+    }
 
     public async Task LoadModuleAsync(string module)
     {

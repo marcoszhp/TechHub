@@ -14,5 +14,6 @@
     <PackageReference Include="Moq" Version="4.20.72" />
     <Using Include="Xunit" />
     <ProjectReference Include="../../src/TechHub.App/TechHub.App.csproj" />
+    <ProjectReference Include="../../src/TechHub.Updater/TechHub.Updater.csproj" />
   </ItemGroup>
 </Project>
